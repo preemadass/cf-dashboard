@@ -1,7 +1,7 @@
 {
   "meta": {
-    "published_at": "23 Jun 2026, 04:45 PM",
-    "published_at_iso": "2026-06-23T16:45:31.842705",
+    "published_at": "23 Jun 2026, 04:51 PM",
+    "published_at_iso": "2026-06-23T16:51:48.189966",
     "published_by": "AP",
     "company_name": "Fortune Bit Solutions Sdn Bhd",
     "department": "CEO's Office — Corporate Finance",
@@ -10,8 +10,8 @@
     "reviewer_pin": "1234"
   },
   "summary": {
-    "total_projects": 12,
-    "active_projects": 12,
+    "total_projects": 13,
+    "active_projects": 13,
     "green": 1,
     "amber": 3,
     "red": 4,
@@ -268,6 +268,27 @@
       "actual_completion": "",
       "external_advisors": "",
       "confidentiality_level": "Internal",
+      "key_risk": "",
+      "next_action": "",
+      "next_action_due": "",
+      "brief_description": "",
+      "notes": ""
+    },
+    {
+      "project_id": "PROJ-013",
+      "project_name": "Project Test",
+      "project_type": "Other",
+      "type_—_if_other,_specify_here": "",
+      "priority": "",
+      "overall_status": "",
+      "stage": "",
+      "deal_value_rm": "",
+      "project_lead": "",
+      "date_initiated": "",
+      "target_completion": "",
+      "actual_completion": "",
+      "external_advisors": "",
+      "confidentiality_level": "",
       "key_risk": "",
       "next_action": "",
       "next_action_due": "",
