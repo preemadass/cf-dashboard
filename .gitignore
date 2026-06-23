@@ -1,0 +1,12 @@
+CF_Project_Tracker.xlsx
+*.xlsx
+*.xls
+config.json
+publish.py
+start_dashboard.bat
+publish_and_open.bat
+echo *.xlsx >> .gitignore
+echo config.json >> .gitignore
+echo publish.py >> .gitignore
+echo start_dashboard.bat >> .gitignore
+echo publish_and_open.bat >> .gitignore

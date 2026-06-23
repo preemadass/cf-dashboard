@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CF Deal Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:        #1a2744;
+  --navy-light:  #243358;
+  --navy-mid:    #2f4070;
+  --gold:        #c9a227;
+  --gold-light:  #e8c84a;
+  --offwhite:    #f0ede8;
+  --muted:       #a8b0c0;
+  --surface:     #1e2d50;
+  --surface2:    #243358;
+  --surface3:    #2a3d6b;
+  --green:       #3dba6e;
+  --green-bg:    rgba(61,186,110,0.12);
+  --amber:       #f0a500;
+  --amber-bg:    rgba(240,165,0,0.12);
+  --red:         #e05252;
+  --red-bg:      rgba(224,82,82,0.12);
+  --hold:        #7a8aaa;
+  --hold-bg:     rgba(122,138,170,0.12);
+  --border:      rgba(255,255,255,0.07);
+  --border2:     rgba(255,255,255,0.12);
+  --text:        #e8ecf4;
+  --text-dim:    #8a96b0;
+  --radius:      10px;
+  --radius-sm:   6px;
+  --shadow:      0 4px 24px rgba(0,0,0,0.35);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.2);
+  --transition:  0.22s ease;
+}
+html { font-size: 14px; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+button { font-family: 'Inter', sans-serif; cursor: pointer; border: none; }
+input, textarea, select { font-family: 'Inter', sans-serif; }
+a { color: var(--gold); text-decoration: none; }
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--navy); }
+::-webkit-scrollbar-thumb { background: var(--navy-mid); border-radius: 3px; }
+
+/* ─── TOPBAR ─────────────────────────────────────────────────────────────── */
+#topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--navy);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 28px;
+  height: 58px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+}
+#topbar-left { display: flex; align-items: center; gap: 18px; }
+#topbar-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  color: var(--offwhite);
+  letter-spacing: 0.01em;
+}
+#topbar-logo span { color: var(--gold); }
+.topbar-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-left: 1px solid var(--border2);
+  padding-left: 18px;
+}
+#topbar-right { display: flex; align-items: center; gap: 14px; }
+#published-badge {
+  font-size: 0.7rem;
+  color: var(--muted);
+  background: var(--surface);
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+#published-badge strong { color: var(--gold); }
+#mode-btn {
+  font-size: 0.75rem; font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 20px;
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  transition: var(--transition);
+  letter-spacing: 0.04em;
+}
+#mode-btn:hover { background: var(--surface3); color: var(--offwhite); }
+#mode-btn.reviewer-active {
+  background: var(--gold);
+  color: var(--navy);
+  border-color: var(--gold);
+}
+
+/* ─── PIN OVERLAY ────────────────────────────────────────────────────────── */
+#pin-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(10,16,30,0.88);
+  backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+#pin-overlay.show { display: flex; }
+#pin-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 36px 40px;
+  width: 340px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+#pin-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+  color: var(--offwhite);
+}
+#pin-box p { font-size: 0.78rem; color: var(--muted); margin-bottom: 22px; }
+#pin-input {
+  width: 100%; padding: 12px 16px;
+  background: var(--navy); color: var(--offwhite);
+  border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  font-size: 1.1rem; letter-spacing: 0.3em; text-align: center;
+  margin-bottom: 14px;
+  transition: border-color var(--transition);
+}
+#pin-input:focus { outline: none; border-color: var(--gold); }
+#pin-submit {
+  width: 100%; padding: 11px;
+  background: var(--gold); color: var(--navy);
+  font-weight: 700; font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  letter-spacing: 0.04em;
+}
+#pin-submit:hover { background: var(--gold-light); }
+#pin-error {
+  font-size: 0.75rem; color: var(--red);
+  margin-top: 10px; display: none;
+}
+#pin-cancel {
+  margin-top: 14px; font-size: 0.75rem;
+  color: var(--muted); background: none;
+  text-decoration: underline;
+}
+
+/* ─── MAIN LAYOUT ────────────────────────────────────────────────────────── */
+#main { max-width: 1400px; margin: 0 auto; padding: 28px 28px 60px; }
+
+/* ─── SECTION LABEL ──────────────────────────────────────────────────────── */
+.section-label {
+  font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* ─── KPI CARDS ──────────────────────────────────────────────────────────── */
+#kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.kpi-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gold);
+  opacity: 0.5;
+}
+.kpi-card.green-card::before { background: var(--green); opacity: 1; }
+.kpi-card.amber-card::before { background: var(--amber); opacity: 1; }
+.kpi-card.red-card::before   { background: var(--red);   opacity: 1; }
+.kpi-label {
+  font-size: 0.68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.09em;
+  color: var(--muted); margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 1.9rem; font-weight: 700;
+  color: var(--offwhite); line-height: 1;
+  margin-bottom: 4px;
+}
+.kpi-value.big { font-size: 1.4rem; }
+.kpi-sub { font-size: 0.7rem; color: var(--text-dim); }
+
+/* ─── TOOLBAR ────────────────────────────────────────────────────────────── */
+#toolbar {
+  display: flex; align-items: center;
+  gap: 10px; margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  font-size: 0.73rem; font-weight: 600;
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--surface); color: var(--muted);
+  border: 1px solid var(--border2);
+  transition: var(--transition);
+  letter-spacing: 0.03em;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--surface3); color: var(--offwhite);
+  border-color: var(--gold);
+}
+#search-box {
+  margin-left: auto;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 16px 6px 36px;
+  color: var(--offwhite);
+  font-size: 0.78rem;
+  width: 220px;
+  position: relative;
+  transition: border-color var(--transition);
+}
+#search-box:focus { outline: none; border-color: var(--gold); }
+#search-wrap { position: relative; }
+#search-wrap::before {
+  content: '⌕';
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); font-size: 1rem; pointer-events: none;
+}
+
+/* ─── PROJECT TABLE ──────────────────────────────────────────────────────── */
+#projects-table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.table-head {
+  display: grid;
+  grid-template-columns: 28px 2.2fr 1fr 1fr 0.8fr 1fr 1.2fr 1fr 36px;
+  gap: 0;
+  background: var(--navy-mid);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 16px;
+}
+.th {
+  font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--muted);
+  padding: 11px 10px;
+}
+.th:first-child, .th:last-child { padding: 11px 4px; }
+
+/* ─── PROJECT ROW ────────────────────────────────────────────────────────── */
+.project-row-wrap {
+  border-bottom: 1px solid var(--border);
+}
+.project-row-wrap:last-child { border-bottom: none; }
+.project-row {
+  display: grid;
+  grid-template-columns: 28px 2.2fr 1fr 1fr 0.8fr 1fr 1.2fr 1fr 36px;
+  gap: 0;
+  padding: 0 16px;
+  align-items: center;
+  cursor: pointer;
+  transition: background var(--transition);
+  position: relative;
+  border-left: 3px solid transparent;
+}
+.project-row:hover { background: var(--surface2); }
+.project-row.expanded { background: var(--surface2); border-left-color: var(--gold); }
+.project-row.rag-green { border-left-color: var(--green); }
+.project-row.rag-amber { border-left-color: var(--amber); }
+.project-row.rag-red   { border-left-color: var(--red);   }
+.project-row.rag-hold  { border-left-color: var(--hold);  }
+.project-row.rag-completed { border-left-color: var(--muted); }
+
+.td {
+  padding: 13px 10px;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+.td:first-child { padding: 13px 4px; }
+.td:last-child  { padding: 13px 4px; text-align: center; }
+
+.proj-name { font-weight: 600; color: var(--offwhite); line-height: 1.35; }
+.proj-desc { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;
+             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+
+/* RAG dot */
+.rag-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.rag-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.rag-dot.amber { background: var(--amber); }
+.rag-dot.red   { background: var(--red);
+  animation: pulse-red 1.8s ease-in-out infinite; }
+.rag-dot.hold      { background: var(--hold); }
+.rag-dot.completed { background: var(--muted); }
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224,82,82,0.5); }
+  50%       { box-shadow: 0 0 0 5px rgba(224,82,82,0); }
+}
+
+/* pill badges */
+.pill {
+  display: inline-block;
+  font-size: 0.65rem; font-weight: 600;
+  padding: 3px 9px; border-radius: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.pill-type    { background: rgba(201,162,39,0.15); color: var(--gold); }
+.pill-stage   { background: var(--surface3); color: var(--text-dim); }
+.pill-priority-critical { background: rgba(224,82,82,0.2); color: #ff8080; }
+.pill-priority-high     { background: rgba(240,165,0,0.15); color: var(--amber); }
+.pill-priority-medium   { background: rgba(61,186,110,0.12); color: var(--green); }
+.pill-priority-low      { background: var(--surface3); color: var(--text-dim); }
+
+.deal-val { font-weight: 600; color: var(--offwhite); font-variant-numeric: tabular-nums; }
+.deal-val.zero { color: var(--text-dim); font-weight: 400; }
+
+.next-action-cell { font-size: 0.75rem; color: var(--text-dim); line-height: 1.35; }
+.next-action-due  { font-size: 0.68rem; color: var(--amber); margin-top: 2px; }
+.next-action-due.overdue { color: var(--red); font-weight: 600; }
+
+.chevron { color: var(--muted); font-size: 0.9rem; transition: transform 0.22s; user-select: none; }
+.chevron.open { transform: rotate(90deg); color: var(--gold); }
+
+/* ─── DRAWER ─────────────────────────────────────────────────────────────── */
+.project-drawer {
+  display: none;
+  background: var(--navy);
+  border-top: 1px solid var(--border);
+  padding: 20px 24px 24px 44px;
+}
+.project-drawer.open { display: block; }
+
+/* Drawer header */
+.drawer-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 18px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.drawer-title { font-size: 0.75rem; font-weight: 700; color: var(--gold);
+                text-transform: uppercase; letter-spacing: 0.08em; }
+.drawer-meta  { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
+
+/* CEO comment button inside drawer */
+.ceo-comment-btn {
+  display: none;
+  font-size: 0.72rem; font-weight: 600;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  background: rgba(201,162,39,0.15);
+  color: var(--gold);
+  border: 1px solid rgba(201,162,39,0.3);
+  transition: var(--transition);
+  gap: 6px; align-items: center;
+}
+.ceo-comment-btn:hover { background: rgba(201,162,39,0.25); }
+.ceo-comment-btn.reviewer-visible { display: flex; }
+
+/* Workstreams */
+.ws-grid { display: flex; flex-direction: column; gap: 10px; }
+.ws-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  position: relative;
+  border-left: 3px solid var(--border2);
+}
+.ws-card.ws-green  { border-left-color: var(--green); }
+.ws-card.ws-amber  { border-left-color: var(--amber); }
+.ws-card.ws-red    { border-left-color: var(--red); }
+.ws-card.ws-done   { border-left-color: var(--muted); opacity: 0.7; }
+
+.ws-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ws-name { font-weight: 600; font-size: 0.82rem; color: var(--offwhite); flex: 1; }
+.ws-owner { font-size: 0.7rem; color: var(--text-dim); }
+.ws-type-pill { font-size: 0.62rem; font-weight: 600; padding: 2px 8px;
+                border-radius: 20px; background: var(--surface2); color: var(--muted);
+                text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Progress bar */
+.progress-wrap { margin-bottom: 10px; }
+.progress-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.68rem; color: var(--text-dim); margin-bottom: 4px;
+}
+.progress-pct { font-weight: 600; color: var(--offwhite); }
+.progress-bar {
+  height: 5px; background: var(--surface3);
+  border-radius: 3px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition: width 0.6s ease;
+}
+.progress-fill.complete { background: var(--green); }
+.progress-fill.at-risk  { background: var(--red); }
+
+/* Tasks table inside ws-card */
+.tasks-label {
+  font-size: 0.63rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px;
+}
+.task-list { display: flex; flex-direction: column; gap: 4px; }
+.task-item {
+  display: grid;
+  grid-template-columns: 14px 1fr 90px 80px 80px;
+  gap: 8px; align-items: center;
+  font-size: 0.73rem;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.task-item:last-child { border-bottom: none; }
+.task-check { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+              border: 2px solid var(--border2); display: flex; align-items: center; justify-content: center; }
+.task-check.done { background: var(--green); border-color: var(--green); }
+.task-check.done::after { content: '✓'; font-size: 8px; color: white; }
+.task-check.overdue { border-color: var(--red); }
+.task-check.inprogress { border-color: var(--amber); }
+.task-desc { color: var(--text); }
+.task-desc.done-text { text-decoration: line-through; color: var(--text-dim); }
+.task-assignee { color: var(--text-dim); font-size: 0.68rem; }
+.task-due { font-size: 0.68rem; }
+.task-due.overdue { color: var(--red); font-weight: 600; }
+.task-status-pill {
+  font-size: 0.6rem; font-weight: 700; padding: 2px 7px;
+  border-radius: 20px; text-align: center;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.status-todo     { background: var(--surface3); color: var(--muted); }
+.status-inprog   { background: rgba(240,165,0,0.15); color: var(--amber); }
+.status-done     { background: rgba(61,186,110,0.12); color: var(--green); }
+.status-overdue  { background: rgba(224,82,82,0.15); color: var(--red); }
+.status-pending  { background: rgba(122,138,170,0.15); color: var(--hold); }
+.status-cancelled{ background: var(--surface3); color: var(--text-dim); }
+
+/* Task add comment btn */
+.task-comment-btn {
+  display: none;
+  font-size: 0.6rem; font-weight: 600; padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(201,162,39,0.1); color: var(--gold);
+  border: 1px solid rgba(201,162,39,0.25);
+  cursor: pointer; white-space: nowrap;
+}
+.task-comment-btn.reviewer-visible { display: block; }
+
+/* Comments section in drawer */
+.comments-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.comment-card {
+  background: rgba(201,162,39,0.05);
+  border: 1px solid rgba(201,162,39,0.15);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  margin-bottom: 8px;
+  font-size: 0.77rem;
+}
+.comment-card.open-comment   { border-left: 3px solid var(--red); }
+.comment-card.ack-comment    { border-left: 3px solid var(--amber); }
+.comment-card.resolved-comment { border-left: 3px solid var(--green); }
+.comment-top { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+.comment-by  { font-weight: 700; color: var(--gold); font-size: 0.72rem; }
+.comment-ts  { font-size: 0.68rem; color: var(--text-dim); }
+.comment-type-badge {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 20px;
+  background: rgba(201,162,39,0.15); color: var(--gold);
+  letter-spacing: 0.05em;
+}
+.comment-type-badge.direction { background: rgba(224,82,82,0.15); color: #ff9090; }
+.comment-type-badge.approval  { background: rgba(61,186,110,0.15); color: var(--green); }
+.comment-type-badge.query     { background: rgba(122,138,170,0.15); color: var(--hold); }
+.comment-body { color: var(--text); line-height: 1.5; }
+.comment-response { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+                    font-size: 0.72rem; }
+.comment-response-label { color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase;
+                           letter-spacing: 0.08em; margin-bottom: 3px; }
+.comment-response-text { color: var(--green); }
+.no-comments { font-size: 0.73rem; color: var(--text-dim); font-style: italic; padding: 8px 0; }
+
+/* ─── COMMENT MODAL ──────────────────────────────────────────────────────── */
+#comment-modal {
+  display: none; position: fixed; inset: 0; z-index: 998;
+  background: rgba(10,16,30,0.85); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+#comment-modal.show { display: flex; }
+#comment-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 30px 32px;
+  width: 520px; max-width: 95vw;
+  box-shadow: var(--shadow);
+}
+#comment-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem; color: var(--offwhite);
+  margin-bottom: 4px;
+}
+#comment-box .modal-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 22px; }
+.form-row { margin-bottom: 14px; }
+.form-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+              letter-spacing: 0.08em; color: var(--muted); margin-bottom: 5px; display: block; }
+.form-select, .form-input, .form-textarea {
+  width: 100%; padding: 10px 13px;
+  background: var(--navy); color: var(--offwhite);
+  border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  transition: border-color var(--transition);
+}
+.form-select:focus, .form-input:focus, .form-textarea:focus {
+  outline: none; border-color: var(--gold);
+}
+.form-textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+.form-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+#comment-submit {
+  padding: 10px 22px; background: var(--gold); color: var(--navy);
+  font-weight: 700; font-size: 0.82rem; border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+#comment-submit:hover { background: var(--gold-light); }
+#comment-cancel {
+  padding: 10px 18px; background: var(--surface2);
+  color: var(--muted); font-size: 0.82rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  transition: var(--transition);
+}
+#comment-cancel:hover { color: var(--offwhite); }
+#comment-success {
+  text-align: center; padding: 16px 0; display: none;
+}
+#comment-success .tick { font-size: 2.5rem; color: var(--green); }
+#comment-success p { margin-top: 8px; font-size: 0.82rem; color: var(--text-dim); }
+
+/* ─── FLOATING COMMENT FAB ───────────────────────────────────────────────── */
+#fab {
+  display: none;
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--gold); color: var(--navy);
+  font-weight: 700; font-size: 0.8rem;
+  padding: 13px 22px; border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(201,162,39,0.4);
+  transition: transform var(--transition), box-shadow var(--transition);
+  z-index: 90;
+  letter-spacing: 0.03em;
+}
+#fab:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,162,39,0.5); }
+#fab.reviewer-visible { display: block; }
+
+/* ─── EMPTY STATE ────────────────────────────────────────────────────────── */
+#empty-state {
+  display: none; padding: 48px;
+  text-align: center;
+  color: var(--text-dim);
+}
+#empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+#empty-state p { font-size: 0.82rem; }
+
+/* ─── FOOTER ─────────────────────────────────────────────────────────────── */
+#footer {
+  text-align: center; padding: 24px;
+  font-size: 0.68rem; color: var(--text-dim);
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+
+/* ─── LOADING ────────────────────────────────────────────────────────────── */
+#loading {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 40vh; gap: 14px;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--border2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#error-msg {
+  display: none; padding: 24px;
+  background: rgba(224,82,82,0.1);
+  border: 1px solid rgba(224,82,82,0.3);
+  border-radius: var(--radius); color: var(--red);
+  font-size: 0.82rem; line-height: 1.6;
+  margin: 24px;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  #kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+  #kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .table-head { display: none; }
+  .project-row {
+    grid-template-columns: 1fr;
+    gap: 4px; padding: 14px 16px;
+  }
+  .td { padding: 2px 0; }
+  .td:last-child { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ──────────────────────────────────────────────────────────────── -->
+<div id="topbar">
+  <div id="topbar-left">
+    <div id="topbar-logo">CF <span>Deal Monitor</span></div>
+    <div id="dept-label" class="topbar-sub">CEO's Office</div>
+  </div>
+  <div id="topbar-right">
+    <div id="published-badge">
+      Data as of <strong id="pub-date">—</strong>
+    </div>
+    <button id="mode-btn" onclick="toggleReviewerMode()">🔒 Reviewer Mode</button>
+  </div>
+</div>
+
+<!-- ── PIN OVERLAY ─────────────────────────────────────────────────────────── -->
+<div id="pin-overlay">
+  <div id="pin-box">
+    <h3>Reviewer Access</h3>
+    <p>Enter your PIN to enable commenting and directions.</p>
+    <input type="password" id="pin-input" maxlength="8" placeholder="••••"
+           onkeydown="if(event.key==='Enter') submitPin()">
+    <button id="pin-submit" onclick="submitPin()">UNLOCK</button>
+    <div id="pin-error">Incorrect PIN. Please try again.</div>
+    <button id="pin-cancel" onclick="closePinOverlay()">Cancel</button>
+  </div>
+</div>
+
+<!-- ── COMMENT MODAL ────────────────────────────────────────────────────────── -->
+<div id="comment-modal">
+  <div id="comment-box">
+    <h3>Add Comment / Direction</h3>
+    <p class="modal-sub">Your comment will be saved and synced back to AP on the next publish.</p>
+    <div id="comment-form">
+      <div class="form-row-2col">
+        <div class="form-row">
+          <label class="form-label">Comment Level</label>
+          <select class="form-select" id="cm-level" onchange="updateCommentLevel()">
+            <option value="General">General</option>
+            <option value="Project">Project</option>
+            <option value="Workstream">Workstream</option>
+            <option value="Task">Task</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Type</label>
+          <select class="form-select" id="cm-type">
+            <option value="Direction">Direction</option>
+            <option value="Query">Query</option>
+            <option value="Approval">Approval</option>
+            <option value="Flag for Discussion">Flag for Discussion</option>
+            <option value="Concern">Concern</option>
+            <option value="Information Only">Information Only</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" id="cm-project-row">
+        <label class="form-label">Project</label>
+        <select class="form-select" id="cm-project"></select>
+      </div>
+      <div class="form-row" id="cm-ws-row" style="display:none">
+        <label class="form-label">Workstream</label>
+        <select class="form-select" id="cm-workstream"></select>
+      </div>
+      <div class="form-row" id="cm-task-row" style="display:none">
+        <label class="form-label">Task</label>
+        <select class="form-select" id="cm-task"></select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Comment / Direction</label>
+        <textarea class="form-textarea" id="cm-text"
+          placeholder="Type your comment, direction, query or approval here..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Your Name</label>
+        <input type="text" class="form-input" id="cm-author" value="CEO" placeholder="e.g. CEO, COO">
+      </div>
+    </div>
+    <div id="comment-success">
+      <div class="tick">✓</div>
+      <p>Comment saved. AP will be notified on the next dashboard refresh.<br>
+         It will be synced into Excel on the next publish.</p>
+    </div>
+    <div class="modal-footer" id="comment-footer">
+      <button id="comment-cancel" onclick="closeCommentModal()">Cancel</button>
+      <button id="comment-submit" onclick="submitComment()">Save Comment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FAB ─────────────────────────────────────────────────────────────────── -->
+<button id="fab" class="reviewer-visible" onclick="openCommentModal('General','','','')">
+  + Add Direction
+</button>
+
+<!-- ── MAIN ─────────────────────────────────────────────────────────────────── -->
+<div id="main">
+
+  <!-- Loading state -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <div style="font-size:0.8rem;color:var(--muted)">Loading dashboard data...</div>
+  </div>
+
+  <!-- Error state -->
+  <div id="error-msg"></div>
+
+  <!-- Dashboard content (hidden until data loads) -->
+  <div id="dashboard-content" style="display:none">
+
+    <!-- KPI Row -->
+    <div class="section-label">Portfolio Overview</div>
+    <div id="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Projects</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub" id="kpi-active-sub">— active</div>
+      </div>
+      <div class="kpi-card green-card">
+        <div class="kpi-label">On Track</div>
+        <div class="kpi-value" id="kpi-green" style="color:var(--green)">—</div>
+        <div class="kpi-sub">Green status</div>
+      </div>
+      <div class="kpi-card amber-card">
+        <div class="kpi-label">Needs Attention</div>
+        <div class="kpi-value" id="kpi-amber" style="color:var(--amber)">—</div>
+        <div class="kpi-sub">Amber status</div>
+      </div>
+      <div class="kpi-card red-card">
+        <div class="kpi-label">At Risk</div>
+        <div class="kpi-value" id="kpi-red" style="color:var(--red)">—</div>
+        <div class="kpi-sub">Red status</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pipeline Value</div>
+        <div class="kpi-value big" id="kpi-value">—</div>
+        <div class="kpi-sub" id="kpi-currency-sub">Active deals (RM)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Action Items</div>
+        <div class="kpi-value" id="kpi-overdue" style="color:var(--amber)">—</div>
+        <div class="kpi-sub" id="kpi-comments-sub">— open CEO comments</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div id="toolbar">
+      <div class="section-label" style="margin:0;margin-right:6px">Projects</div>
+      <button class="filter-btn active" onclick="filterProjects('all',this)">All</button>
+      <button class="filter-btn" onclick="filterProjects('green',this)">🟢 Green</button>
+      <button class="filter-btn" onclick="filterProjects('amber',this)">🟡 Amber</button>
+      <button class="filter-btn" onclick="filterProjects('red',this)">🔴 Red</button>
+      <button class="filter-btn" onclick="filterProjects('active',this)">Active</button>
+      <button class="filter-btn" onclick="filterProjects('completed',this)">Completed</button>
+      <div id="search-wrap">
+        <input type="text" id="search-box" placeholder="Search projects..."
+               oninput="searchProjects(this.value)">
+      </div>
+    </div>
+
+    <!-- Projects Table -->
+    <div id="projects-table">
+      <div class="table-head">
+        <div class="th"></div>
+        <div class="th">Project</div>
+        <div class="th">Type / Stage</div>
+        <div class="th">Priority</div>
+        <div class="th">Status</div>
+        <div class="th">Deal Value</div>
+        <div class="th">Next Action</div>
+        <div class="th">Lead / Advisors</div>
+        <div class="th"></div>
+      </div>
+      <div id="projects-body"></div>
+      <div id="empty-state">
+        <div class="empty-icon">📂</div>
+        <p>No projects match the current filter.</p>
+      </div>
+    </div>
+
+  </div><!-- /dashboard-content -->
+</div><!-- /main -->
+
+<div id="footer">
+  CF Deal Monitor — <span id="footer-company">CEO's Office</span> &nbsp;|&nbsp;
+  Built for internal use only &nbsp;|&nbsp;
+  <span id="footer-pub"></span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let DATA          = null;   // full parsed dashboard_data.json
+let IS_REVIEWER   = false;  // is the user in reviewer mode
+let FILTER        = 'all';  // current filter
+let SEARCH        = '';     // current search string
+let pendingComments = [];   // comments queued to be saved
+
+// Pre-fill context for comment modal
+let cmContext = { level: 'General', projectId: '', wsId: '', taskId: '' };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOAD DATA
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadData() {
+  try {
+    // Try to load from same folder as dashboard.html
+    const urls = [
+      'dashboard_data.json',
+      './dashboard_data.json',
+    ];
+    let resp = null;
+    for (const url of urls) {
+      try {
+        resp = await fetch(url + '?t=' + Date.now());
+        if (resp.ok) break;
+      } catch(e) { /* try next */ }
+    }
+    if (!resp || !resp.ok) throw new Error('dashboard_data.json not found.');
+
+    DATA = await resp.json();
+    renderDashboard();
+
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    const errEl = document.getElementById('error-msg');
+    errEl.style.display = 'block';
+    errEl.innerHTML = `
+      <strong>Could not load dashboard data.</strong><br><br>
+      ${err.message}<br><br>
+      <strong>To fix this:</strong><br>
+      1. Make sure <code>dashboard_data.json</code> is in the same folder as this HTML file.<br>
+      2. Run <code>publish.py</code> first to generate the data file.<br>
+      3. If opening this file directly from your desktop, try opening it from the
+         OneDrive folder instead.<br><br>
+      <em>Technical detail: ${err}</em>
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+function renderDashboard() {
+  if (!DATA) return;
+
+  // Hide loading, show content
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('dashboard-content').style.display = 'block';
+
+  const m = DATA.meta || {};
+  const s = DATA.summary || {};
+
+  // Topbar
+  document.getElementById('pub-date').textContent =
+    m.published_at || 'Unknown';
+  document.getElementById('dept-label').textContent =
+    m.department || "CEO's Office";
+  document.title = `CF Deal Monitor — ${m.company_name || ''}`;
+
+  // Footer
+  document.getElementById('footer-company').textContent =
+    m.company_name || '';
+  document.getElementById('footer-pub').textContent =
+    `Published by ${m.published_by || 'AP'} on ${m.published_at || '—'}`;
+
+  // KPIs
+  document.getElementById('kpi-total').textContent  = s.total_projects || 0;
+  document.getElementById('kpi-active-sub').textContent =
+    `${s.active_projects || 0} active`;
+  document.getElementById('kpi-green').textContent  = s.green   || 0;
+  document.getElementById('kpi-amber').textContent  = s.amber   || 0;
+  document.getElementById('kpi-red').textContent    = s.red     || 0;
+  document.getElementById('kpi-overdue').textContent= s.overdue_tasks || 0;
+  document.getElementById('kpi-comments-sub').textContent =
+    `${s.open_comments || 0} open CEO comments`;
+
+  // Deal value — format as RM millions if >= 1M
+  const val = s.total_deal_value_rm || 0;
+  const cur = m.currency || 'RM';
+  let valStr;
+  if (val === 0) {
+    valStr = '—';
+  } else if (val >= 1000000) {
+    valStr = (val / 1000000).toFixed(1) + 'M';
+  } else {
+    valStr = val.toLocaleString();
+  }
+  document.getElementById('kpi-value').textContent = valStr;
+  document.getElementById('kpi-currency-sub').textContent =
+    `Active deals (${cur})`;
+
+  // Populate comment modal project dropdown
+  populateCommentProjects();
+
+  // Render projects
+  renderProjects();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER PROJECTS
+// ═══════════════════════════════════════════════════════════════════════════
+function renderProjects() {
+  const body = document.getElementById('projects-body');
+  body.innerHTML = '';
+
+  const projects = getFilteredProjects();
+
+  document.getElementById('empty-state').style.display =
+    projects.length === 0 ? 'block' : 'none';
+
+  projects.forEach(proj => {
+    const wrap   = document.createElement('div');
+    wrap.className = 'project-row-wrap';
+    wrap.id = `wrap-${proj.project_id}`;
+    wrap.innerHTML = buildProjectRow(proj) + buildDrawer(proj);
+    body.appendChild(wrap);
+  });
+}
+
+function getFilteredProjects() {
+  if (!DATA || !DATA.projects) return [];
+  return DATA.projects.filter(p => {
+    const status = (p.overall_status || '').toLowerCase();
+    const search = SEARCH.toLowerCase();
+
+    // Filter
+    if (FILTER === 'green'     && status !== 'green')     return false;
+    if (FILTER === 'amber'     && status !== 'amber')     return false;
+    if (FILTER === 'red'       && status !== 'red')       return false;
+    if (FILTER === 'completed' && status !== 'completed') return false;
+    if (FILTER === 'active'    &&
+        ['completed','cancelled','on hold'].includes(status)) return false;
+
+    // Search
+    if (search) {
+      const haystack = [
+        p.project_name, p.project_type, p.stage,
+        p.project_lead, p.brief_description, p.next_action
+      ].join(' ').toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+}
+
+function buildProjectRow(proj) {
+  const status  = (proj.overall_status || '').toLowerCase();
+  const ragClass= ragStatusClass(status);
+  const ragDot  = `<span class="rag-dot ${ragDotClass(status)}"></span>`;
+
+  const dealVal = proj.deal_value_rm;
+  const cur     = (DATA.meta || {}).currency || 'RM';
+  let dealStr   = '—';
+  if (dealVal && dealVal !== '' && dealVal !== 0) {
+    const num = parseFloat(dealVal);
+    if (!isNaN(num) && num > 0) {
+      dealStr = num >= 1000000
+        ? `${cur} ${(num/1000000).toFixed(1)}M`
+        : `${cur} ${num.toLocaleString()}`;
+    }
+  }
+
+  const nextDue     = proj.next_action_due || '';
+  const isOverdue   = nextDue && isPastDate(nextDue);
+  const dueClass    = isOverdue ? 'overdue' : '';
+  const typeLabel   = proj.project_type === 'Other' && proj['type_—_if_other,_specify_here']
+    ? proj['type_—_if_other,_specify_here']
+    : (proj.project_type || '—');
+
+  return `
+  <div class="project-row ${ragClass}" id="row-${proj.project_id}"
+       onclick="toggleDrawer('${proj.project_id}')">
+    <div class="td">${ragDot}</div>
+    <div class="td">
+      <div class="proj-name">${escHtml(proj.project_name || '')}</div>
+      <div class="proj-desc">${escHtml(proj.brief_description || '')}</div>
+    </div>
+    <div class="td">
+      <span class="pill pill-type">${escHtml(typeLabel)}</span><br>
+      <span class="pill pill-stage" style="margin-top:4px">${escHtml(proj.stage || '—')}</span>
+    </div>
+    <div class="td">
+      <span class="pill ${priorityClass(proj.priority)}">${escHtml(proj.priority || '—')}</span>
+    </div>
+    <div class="td">
+      <span style="font-size:0.75rem;font-weight:600;color:${ragTextColor(status)}">
+        ${proj.overall_status || '—'}
+      </span>
+    </div>
+    <div class="td">
+      <span class="deal-val ${dealVal == 0 || dealVal === '' ? 'zero' : ''}">${dealStr}</span>
+    </div>
+    <div class="td next-action-cell">
+      ${escHtml(proj.next_action || '—')}
+      ${nextDue ? `<div class="next-action-due ${dueClass}">⏱ ${nextDue}</div>` : ''}
+    </div>
+    <div class="td" style="font-size:0.75rem">
+      <div>${escHtml(proj.project_lead || '—')}</div>
+      <div style="color:var(--text-dim);margin-top:2px;font-size:0.68rem">
+        ${escHtml(proj.external_advisors || '')}
+      </div>
+    </div>
+    <div class="td">
+      <span class="chevron" id="chev-${proj.project_id}">›</span>
+    </div>
+  </div>`;
+}
+
+function buildDrawer(proj) {
+  const projId = proj.project_id;
+
+  // Get workstreams for this project
+  const wsList = (DATA.workstreams || [])
+    .filter(w => w.project_id === projId);
+
+  // Get all tasks for this project
+  const allTasks = DATA.tasks || [];
+
+  // Get counterparties
+  const cps = (DATA.counterparties || [])
+    .filter(c => c.project_id === projId);
+
+  // Get CEO comments for this project
+  const projComments = (DATA.ceo_comments || [])
+    .filter(c => c.project_id === projId && c.comment_level === 'Project');
+
+  let wsHtml = '';
+  if (wsList.length === 0) {
+    wsHtml = '<div style="color:var(--text-dim);font-size:0.78rem;font-style:italic">No workstreams added yet.</div>';
+  } else {
+    wsList.forEach(ws => {
+      const tasks = allTasks.filter(t => t.workstream_id === ws.workstream_id);
+      const wsComments = (DATA.ceo_comments || [])
+        .filter(c => c.workstream_id === ws.workstream_id && c.comment_level === 'Workstream');
+      wsHtml += buildWsCard(ws, tasks, wsComments, projId);
+    });
+  }
+
+  // Counterparties row
+  let cpHtml = '';
+  if (cps.length > 0) {
+    cpHtml = `
+    <div style="margin-bottom:16px">
+      <div class="tasks-label" style="margin-bottom:8px">Counterparties</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${cps.map(cp => `
+          <div style="background:var(--surface);border:1px solid var(--border);
+                      border-radius:var(--radius-sm);padding:8px 12px;font-size:0.73rem">
+            <div style="font-weight:600;color:var(--offwhite)">${escHtml(cp.counterparty_name||'')}</div>
+            <div style="color:var(--text-dim)">${escHtml(cp.counterparty_role||'')} · ${escHtml(cp.pic_name||'')}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  const projCommentsHtml = buildCommentsSection(projComments, 'project');
+
+  return `
+  <div class="project-drawer" id="drawer-${projId}">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">${escHtml(proj.project_name||'')}</div>
+        <div class="drawer-meta">
+          Lead: ${escHtml(proj.project_lead||'—')} &nbsp;·&nbsp;
+          Initiated: ${escHtml(proj.date_initiated||'—')} &nbsp;·&nbsp;
+          Target: ${escHtml(proj.target_completion||'—')} &nbsp;·&nbsp;
+          Confidentiality: ${escHtml(proj.confidentiality_level||'—')}
+          ${proj.key_risk ? `<br>⚠ Key Risk: ${escHtml(proj.key_risk)}` : ''}
+        </div>
+      </div>
+      <button class="ceo-comment-btn ${IS_REVIEWER ? 'reviewer-visible' : ''}"
+              id="proj-cmt-btn-${projId}"
+              onclick="openCommentModal('Project','${projId}','','')">
+        ✎ Add Direction
+      </button>
+    </div>
+
+    ${cpHtml}
+
+    <div class="tasks-label">Workstreams &amp; Tasks</div>
+    <div class="ws-grid">${wsHtml}</div>
+
+    ${projCommentsHtml}
+  </div>`;
+}
+
+function buildWsCard(ws, tasks, wsComments, projId) {
+  const pct    = parseInt(ws.completion_pct) || 0;
+  const status = (ws.status || '').toLowerCase();
+  let wsClass  = '';
+  if (status === 'green' || status === 'completed') wsClass = pct >= 100 ? 'ws-done' : 'ws-green';
+  else if (status === 'amber' || status === 'in progress') wsClass = 'ws-amber';
+  else if (status === 'red') wsClass = 'ws-red';
+
+  const fillClass = pct >= 100 ? 'complete' : (status === 'red' ? 'at-risk' : '');
+
+  let tasksHtml = '';
+  if (tasks.length > 0) {
+    const taskItems = tasks.map(t => buildTaskItem(t, projId, ws.workstream_id)).join('');
+    tasksHtml = `
+      <div class="tasks-label" style="margin-top:10px">Tasks</div>
+      <div class="task-list">${taskItems}</div>`;
+  }
+
+  const wsCommentsHtml = buildCommentsSection(wsComments, 'workstream');
+
+  return `
+  <div class="ws-card ${wsClass}">
+    <div class="ws-top">
+      <div class="ws-name">${escHtml(ws.workstream_name||'')}</div>
+      <span class="ws-type-pill">${escHtml(ws.workstream_type||'')}</span>
+      <div class="ws-owner">👤 ${escHtml(ws.owner||'—')}</div>
+      <button class="task-comment-btn ${IS_REVIEWER ? 'reviewer-visible' : ''}"
+              onclick="event.stopPropagation();openCommentModal('Workstream','${projId}','${ws.workstream_id}','')">
+        ✎ Comment
+      </button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Progress</span>
+        <span class="progress-pct">${pct}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill ${fillClass}" style="width:${pct}%"></div>
+      </div>
+    </div>
+    ${ws.key_deliverable ? `<div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:6px">📋 ${escHtml(ws.key_deliverable)}</div>` : ''}
+    ${ws.target_completion ? `<div style="font-size:0.68rem;color:var(--muted)">Target: ${escHtml(ws.target_completion)}${ws.actual_completion ? ' · Completed: '+escHtml(ws.actual_completion) : ''}</div>` : ''}
+    ${tasksHtml}
+    ${wsCommentsHtml}
+  </div>`;
+}
+
+function buildTaskItem(task, projId, wsId) {
+  const status   = (task.status || '').toLowerCase();
+  const isDone   = status === 'done';
+  const isOverdue= !isDone && task.due_date && isPastDate(task.due_date);
+
+  let checkClass = '';
+  if (isDone)         checkClass = 'done';
+  else if (isOverdue) checkClass = 'overdue';
+  else if (status.includes('progress')) checkClass = 'inprogress';
+
+  let statusClass = 'status-todo';
+  if (status === 'done')                        statusClass = 'status-done';
+  else if (status.includes('progress'))         statusClass = 'status-inprog';
+  else if (isOverdue || status === 'overdue')   statusClass = 'status-overdue';
+  else if (status.includes('pending'))          statusClass = 'status-pending';
+  else if (status === 'cancelled')              statusClass = 'status-cancelled';
+
+  return `
+  <div class="task-item">
+    <div class="task-check ${checkClass}"></div>
+    <div class="task-desc ${isDone ? 'done-text' : ''}">${escHtml(task.task_description||'')}</div>
+    <div class="task-assignee">${escHtml(task.assignee||'—')}</div>
+    <div class="task-due ${isOverdue ? 'overdue' : ''}">${escHtml(task.due_date||'—')}</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="task-status-pill ${statusClass}">${escHtml(task.status||'—')}</span>
+      <button class="task-comment-btn ${IS_REVIEWER ? 'reviewer-visible' : ''}"
+              onclick="event.stopPropagation();openCommentModal('Task','${projId}','${wsId}','${task.task_id}')">
+        ✎
+      </button>
+    </div>
+  </div>`;
+}
+
+function buildCommentsSection(comments, scope) {
+  if (!comments || comments.length === 0) return '';
+  const html = comments.map(c => {
+    const status  = (c.status || '').toLowerCase();
+    const cClass  = status === 'resolved' ? 'resolved-comment'
+                  : status === 'acknowledged' ? 'ack-comment' : 'open-comment';
+    const typeVal = (c.comment_type || '').toLowerCase();
+    const tClass  = typeVal === 'direction' ? 'direction'
+                  : typeVal === 'approval'  ? 'approval'
+                  : typeVal === 'query'     ? 'query' : '';
+    return `
+    <div class="comment-card ${cClass}">
+      <div class="comment-top">
+        <span class="comment-by">${escHtml(c.commented_by||'CEO')}</span>
+        <span class="comment-ts">${escHtml(c.timestamp||'')}</span>
+        <span class="comment-type-badge ${tClass}">${escHtml(c.comment_type||'')}</span>
+        <span style="margin-left:auto;font-size:0.65rem;font-weight:700;
+                     color:${status==='resolved'?'var(--green)':status==='acknowledged'?'var(--amber)':'var(--red)'}">
+          ${(c.status||'').toUpperCase()}
+        </span>
+      </div>
+      <div class="comment-body">${escHtml(c.comment_text||'')}</div>
+      ${c.ap_response ? `
+        <div class="comment-response">
+          <div class="comment-response-label">AP's Response</div>
+          <div class="comment-response-text">${escHtml(c.ap_response)}</div>
+        </div>` : ''}
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="comments-section">
+    <div class="tasks-label">CEO Directions &amp; Comments</div>
+    ${html}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DRAWER TOGGLE
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleDrawer(projId) {
+  const drawer = document.getElementById(`drawer-${projId}`);
+  const row    = document.getElementById(`row-${projId}`);
+  const chev   = document.getElementById(`chev-${projId}`);
+  if (!drawer) return;
+
+  const isOpen = drawer.classList.contains('open');
+
+  // Close all drawers first
+  document.querySelectorAll('.project-drawer').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.project-row').forEach(r => r.classList.remove('expanded'));
+  document.querySelectorAll('.chevron').forEach(c => c.classList.remove('open'));
+
+  if (!isOpen) {
+    drawer.classList.add('open');
+    row.classList.add('expanded');
+    chev.classList.add('open');
+    // Scroll into view smoothly
+    setTimeout(() => drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FILTER & SEARCH
+// ═══════════════════════════════════════════════════════════════════════════
+function filterProjects(filter, btn) {
+  FILTER = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProjects();
+}
+
+function searchProjects(val) {
+  SEARCH = val;
+  renderProjects();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REVIEWER MODE / PIN
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleReviewerMode() {
+  if (IS_REVIEWER) {
+    // Lock
+    IS_REVIEWER = false;
+    document.getElementById('mode-btn').textContent  = '🔒 Reviewer Mode';
+    document.getElementById('mode-btn').classList.remove('reviewer-active');
+    document.getElementById('fab').classList.remove('reviewer-visible');
+    updateReviewerVisibility();
+  } else {
+    // Show PIN overlay
+    document.getElementById('pin-overlay').classList.add('show');
+    document.getElementById('pin-input').focus();
+  }
+}
+
+function submitPin() {
+  const input = document.getElementById('pin-input').value;
+  const pin   = ((DATA && DATA.meta && DATA.meta.reviewer_pin) || '1234').toString();
+  if (input === pin) {
+    IS_REVIEWER = true;
+    document.getElementById('pin-overlay').classList.remove('show');
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-error').style.display = 'none';
+    document.getElementById('mode-btn').innerHTML = '🔓 Reviewer Mode';
+    document.getElementById('mode-btn').classList.add('reviewer-active');
+    document.getElementById('fab').classList.add('reviewer-visible');
+    updateReviewerVisibility();
+  } else {
+    document.getElementById('pin-error').style.display = 'block';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+  }
+}
+
+function closePinOverlay() {
+  document.getElementById('pin-overlay').classList.remove('show');
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').style.display = 'none';
+}
+
+function updateReviewerVisibility() {
+  // Re-render everything so reviewer buttons appear/disappear correctly
+  renderProjects();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COMMENT MODAL
+// ═══════════════════════════════════════════════════════════════════════════
+function populateCommentProjects() {
+  const sel = document.getElementById('cm-project');
+  if (!sel || !DATA) return;
+  sel.innerHTML = '<option value="">— Select project —</option>';
+  (DATA.projects || []).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.project_id;
+    opt.textContent = `${p.project_id} — ${p.project_name}`;
+    sel.appendChild(opt);
+  });
+}
+
+function updateCommentLevel() {
+  const level = document.getElementById('cm-level').value;
+  const projRow = document.getElementById('cm-project-row');
+  const wsRow   = document.getElementById('cm-ws-row');
+  const taskRow = document.getElementById('cm-task-row');
+
+  projRow.style.display = level === 'General' ? 'none' : 'block';
+  wsRow.style.display   = ['Workstream','Task'].includes(level) ? 'block' : 'none';
+  taskRow.style.display = level === 'Task' ? 'block' : 'none';
+
+  if (['Workstream','Task'].includes(level)) populateCommentWorkstreams();
+  if (level === 'Task') populateCommentTasks();
+}
+
+function populateCommentWorkstreams() {
+  const projId = document.getElementById('cm-project').value;
+  const sel    = document.getElementById('cm-workstream');
+  sel.innerHTML = '<option value="">— Select workstream —</option>';
+  (DATA.workstreams || [])
+    .filter(w => !projId || w.project_id === projId)
+    .forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w.workstream_id;
+      opt.textContent = `${w.workstream_id} — ${w.workstream_name}`;
+      sel.appendChild(opt);
+    });
+}
+
+function populateCommentTasks() {
+  const wsId = document.getElementById('cm-workstream').value;
+  const sel  = document.getElementById('cm-task');
+  sel.innerHTML = '<option value="">— Select task —</option>';
+  (DATA.tasks || [])
+    .filter(t => !wsId || t.workstream_id === wsId)
+    .forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.task_id;
+      opt.textContent = `${t.task_id} — ${t.task_description}`;
+      sel.appendChild(opt);
+    });
+}
+
+function openCommentModal(level, projId, wsId, taskId) {
+  if (!IS_REVIEWER) return;
+
+  document.getElementById('cm-level').value   = level;
+  document.getElementById('cm-author').value  = 'CEO';
+  document.getElementById('cm-text').value    = '';
+  document.getElementById('comment-success').style.display = 'none';
+  document.getElementById('comment-form').style.display    = 'block';
+  document.getElementById('comment-footer').style.display  = 'flex';
+
+  updateCommentLevel();
+
+  // Pre-fill IDs if provided
+  if (projId) document.getElementById('cm-project').value = projId;
+  if (wsId)   { populateCommentWorkstreams(); document.getElementById('cm-workstream').value = wsId; }
+  if (taskId) { populateCommentTasks();       document.getElementById('cm-task').value = taskId; }
+
+  document.getElementById('comment-modal').classList.add('show');
+  setTimeout(() => document.getElementById('cm-text').focus(), 100);
+}
+
+function closeCommentModal() {
+  document.getElementById('comment-modal').classList.remove('show');
+}
+
+function submitComment() {
+  const level  = document.getElementById('cm-level').value;
+  const type   = document.getElementById('cm-type').value;
+  const text   = document.getElementById('cm-text').value.trim();
+  const author = document.getElementById('cm-author').value.trim() || 'CEO';
+  const projId = document.getElementById('cm-project')?.value || '';
+  const wsId   = document.getElementById('cm-workstream')?.value || '';
+  const taskId = document.getElementById('cm-task')?.value || '';
+
+  if (!text) {
+    alert('Please enter a comment before saving.');
+    return;
+  }
+
+  const now = new Date();
+  const ts  = now.getFullYear() + '-'
+    + String(now.getMonth()+1).padStart(2,'0') + '-'
+    + String(now.getDate()).padStart(2,'0') + ' '
+    + String(now.getHours()).padStart(2,'0') + ':'
+    + String(now.getMinutes()).padStart(2,'0');
+
+  const comment = {
+    comment_id:    `CMT-WEB-${Date.now()}`,
+    comment_level: level,
+    project_id:    projId,
+    workstream_id: wsId,
+    task_id:       taskId,
+    commented_by:  author,
+    comment_type:  type,
+    comment_text:  text,
+    timestamp:     ts,
+    status:        'Open',
+    ap_response:   '',
+    ap_response_date: '',
+    resolved_date: ''
+  };
+
+  // Save to localStorage as a queue
+  // (publish.py reads ceo_comments.json; for OneDrive we save a downloadable file)
+  pendingComments.push(comment);
+  saveCommentsLocally();
+
+  // Show success
+  document.getElementById('comment-form').style.display   = 'none';
+  document.getElementById('comment-footer').style.display = 'none';
+  document.getElementById('comment-success').style.display = 'block';
+
+  setTimeout(() => closeCommentModal(), 2500);
+}
+
+function saveCommentsLocally() {
+  // Save to sessionStorage so comments persist during the session
+  const existing = JSON.parse(sessionStorage.getItem('pending_comments') || '[]');
+  existing.push(...pendingComments.splice(0));
+  sessionStorage.setItem('pending_comments', JSON.stringify(existing));
+
+  // Trigger a JSON file download so the CEO can pass it to AP
+  // AP saves it as ceo_comments.json in the CF Dashboard folder
+  // and publish.py picks it up on next run
+  const all = JSON.parse(sessionStorage.getItem('pending_comments') || '[]');
+  const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'ceo_comments.json';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UTILITY FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+function ragStatusClass(status) {
+  switch(status) {
+    case 'green':     return 'rag-green project-row';
+    case 'amber':     return 'rag-amber project-row';
+    case 'red':       return 'rag-red project-row';
+    case 'on hold':   return 'rag-hold project-row';
+    case 'completed': return 'rag-completed project-row';
+    default:          return 'project-row';
+  }
+}
+function ragDotClass(status) {
+  switch(status) {
+    case 'green':     return 'green';
+    case 'amber':     return 'amber';
+    case 'red':       return 'red';
+    case 'on hold':   return 'hold';
+    case 'completed': return 'completed';
+    default:          return 'hold';
+  }
+}
+function ragTextColor(status) {
+  switch(status) {
+    case 'green':     return 'var(--green)';
+    case 'amber':     return 'var(--amber)';
+    case 'red':       return 'var(--red)';
+    case 'on hold':   return 'var(--hold)';
+    case 'completed': return 'var(--muted)';
+    default:          return 'var(--text-dim)';
+  }
+}
+function priorityClass(p) {
+  switch((p||'').toLowerCase()) {
+    case 'critical': return 'pill pill-priority-critical';
+    case 'high':     return 'pill pill-priority-high';
+    case 'medium':   return 'pill pill-priority-medium';
+    case 'low':      return 'pill pill-priority-low';
+    default:         return 'pill pill-priority-low';
+  }
+}
+function isPastDate(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) {
+    // Try DD-MMM-YYYY
+    const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const day = parseInt(parts[0]);
+      const mon = months[parts[1]];
+      const yr  = parseInt(parts[2]);
+      if (!isNaN(day) && mon !== undefined && !isNaN(yr)) {
+        return new Date(yr, mon, day) < new Date();
+      }
+    }
+    return false;
+  }
+  return d < new Date();
+}
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closePinOverlay();
+    closeCommentModal();
+  }
+  // Ctrl+/ to focus search
+  if (e.ctrlKey && e.key === '/') {
+    document.getElementById('search-box').focus();
+    e.preventDefault();
+  }
+});
+
+// Click outside PIN box to close
+document.getElementById('pin-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('pin-overlay')) closePinOverlay();
+});
+
+// Click outside comment modal to close
+document.getElementById('comment-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('comment-modal')) closeCommentModal();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+loadData();
+</script>
+</body>
+</html>
