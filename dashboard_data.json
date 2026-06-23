@@ -1,7 +1,7 @@
 {
   "meta": {
-    "published_at": "23 Jun 2026, 05:03 PM",
-    "published_at_iso": "2026-06-23T17:03:46.072180",
+    "published_at": "23 Jun 2026, 05:06 PM",
+    "published_at_iso": "2026-06-23T17:06:15.051387",
     "published_by": "AP",
     "company_name": "Fortune Bit Solutions Sdn Bhd",
     "department": "CEO's Office — Corporate Finance",
@@ -19,7 +19,7 @@
     "completed": 0,
     "total_deal_value_rm": 70000000,
     "overdue_tasks": 5,
-    "open_comments": 1
+    "open_comments": 2
   },
   "projects": [
     {
@@ -638,6 +638,21 @@
       "comment_type": "Direction",
       "comment_text": "Townhall must happen before end of July. Do not let this slip. Flag to me if venue is an issue.",
       "timestamp": "2025-06-20 10:15",
+      "status": "Open",
+      "ap_response": "",
+      "ap_response_date": "",
+      "resolved_date": ""
+    },
+    {
+      "comment_id": "CMT-WEB-1782205515111",
+      "comment_level": "Workstream",
+      "project_id": "PROJ-001",
+      "workstream_id": "WS-001",
+      "task_id": "",
+      "commented_by": "CEO",
+      "comment_type": "Direction",
+      "comment_text": "WORK FASTER GUYS",
+      "timestamp": "2026-06-23 17:05",
       "status": "Open",
       "ap_response": "",
       "ap_response_date": "",
