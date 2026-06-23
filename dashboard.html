@@ -1,1589 +1,852 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CF Deal Monitor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
-/* ─── RESET & BASE ───────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --navy:        #1a2744;
-  --navy-light:  #243358;
-  --navy-mid:    #2f4070;
-  --gold:        #c9a227;
-  --gold-light:  #e8c84a;
-  --offwhite:    #f0ede8;
-  --muted:       #a8b0c0;
-  --surface:     #1e2d50;
-  --surface2:    #243358;
-  --surface3:    #2a3d6b;
-  --green:       #3dba6e;
-  --green-bg:    rgba(61,186,110,0.12);
-  --amber:       #f0a500;
-  --amber-bg:    rgba(240,165,0,0.12);
-  --red:         #e05252;
-  --red-bg:      rgba(224,82,82,0.12);
-  --hold:        #7a8aaa;
-  --hold-bg:     rgba(122,138,170,0.12);
-  --border:      rgba(255,255,255,0.07);
-  --border2:     rgba(255,255,255,0.12);
-  --text:        #e8ecf4;
-  --text-dim:    #8a96b0;
-  --radius:      10px;
-  --radius-sm:   6px;
-  --shadow:      0 4px 24px rgba(0,0,0,0.35);
-  --shadow-sm:   0 2px 8px rgba(0,0,0,0.2);
-  --transition:  0.22s ease;
-}
-html { font-size: 14px; }
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--navy);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.5;
-}
-button { font-family: 'Inter', sans-serif; cursor: pointer; border: none; }
-input, textarea, select { font-family: 'Inter', sans-serif; }
-a { color: var(--gold); text-decoration: none; }
-
-/* ─── SCROLLBAR ──────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--navy); }
-::-webkit-scrollbar-thumb { background: var(--navy-mid); border-radius: 3px; }
-
-/* ─── TOPBAR ─────────────────────────────────────────────────────────────── */
-#topbar {
-  position: sticky; top: 0; z-index: 100;
-  background: var(--navy);
-  border-bottom: 1px solid var(--border2);
-  padding: 0 28px;
-  height: 58px;
-  display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
-}
-#topbar-left { display: flex; align-items: center; gap: 18px; }
-#topbar-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.25rem;
-  color: var(--offwhite);
-  letter-spacing: 0.01em;
-}
-#topbar-logo span { color: var(--gold); }
-.topbar-sub {
-  font-size: 0.72rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-left: 1px solid var(--border2);
-  padding-left: 18px;
-}
-#topbar-right { display: flex; align-items: center; gap: 14px; }
-#published-badge {
-  font-size: 0.7rem;
-  color: var(--muted);
-  background: var(--surface);
-  padding: 5px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-}
-#published-badge strong { color: var(--gold); }
-#mode-btn {
-  font-size: 0.75rem; font-weight: 600;
-  padding: 7px 16px;
-  border-radius: 20px;
-  background: var(--surface2);
-  color: var(--muted);
-  border: 1px solid var(--border2);
-  transition: var(--transition);
-  letter-spacing: 0.04em;
-}
-#mode-btn:hover { background: var(--surface3); color: var(--offwhite); }
-#mode-btn.reviewer-active {
-  background: var(--gold);
-  color: var(--navy);
-  border-color: var(--gold);
-}
-
-/* ─── PIN OVERLAY ────────────────────────────────────────────────────────── */
-#pin-overlay {
-  display: none;
-  position: fixed; inset: 0; z-index: 999;
-  background: rgba(10,16,30,0.88);
-  backdrop-filter: blur(6px);
-  align-items: center; justify-content: center;
-}
-#pin-overlay.show { display: flex; }
-#pin-box {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  padding: 36px 40px;
-  width: 340px;
-  box-shadow: var(--shadow);
-  text-align: center;
-}
-#pin-box h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.2rem;
-  margin-bottom: 6px;
-  color: var(--offwhite);
-}
-#pin-box p { font-size: 0.78rem; color: var(--muted); margin-bottom: 22px; }
-#pin-input {
-  width: 100%; padding: 12px 16px;
-  background: var(--navy); color: var(--offwhite);
-  border: 1px solid var(--border2); border-radius: var(--radius-sm);
-  font-size: 1.1rem; letter-spacing: 0.3em; text-align: center;
-  margin-bottom: 14px;
-  transition: border-color var(--transition);
-}
-#pin-input:focus { outline: none; border-color: var(--gold); }
-#pin-submit {
-  width: 100%; padding: 11px;
-  background: var(--gold); color: var(--navy);
-  font-weight: 700; font-size: 0.85rem;
-  border-radius: var(--radius-sm);
-  transition: var(--transition);
-  letter-spacing: 0.04em;
-}
-#pin-submit:hover { background: var(--gold-light); }
-#pin-error {
-  font-size: 0.75rem; color: var(--red);
-  margin-top: 10px; display: none;
-}
-#pin-cancel {
-  margin-top: 14px; font-size: 0.75rem;
-  color: var(--muted); background: none;
-  text-decoration: underline;
-}
-
-/* ─── MAIN LAYOUT ────────────────────────────────────────────────────────── */
-#main { max-width: 1400px; margin: 0 auto; padding: 28px 28px 60px; }
-
-/* ─── SECTION LABEL ──────────────────────────────────────────────────────── */
-.section-label {
-  font-size: 0.65rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.12em;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-
-/* ─── KPI CARDS ──────────────────────────────────────────────────────────── */
-#kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
-  margin-bottom: 28px;
-}
-.kpi-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 20px;
-  position: relative;
-  overflow: hidden;
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-.kpi-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--gold);
-  opacity: 0.5;
-}
-.kpi-card.green-card::before { background: var(--green); opacity: 1; }
-.kpi-card.amber-card::before { background: var(--amber); opacity: 1; }
-.kpi-card.red-card::before   { background: var(--red);   opacity: 1; }
-.kpi-label {
-  font-size: 0.68rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.09em;
-  color: var(--muted); margin-bottom: 8px;
-}
-.kpi-value {
-  font-size: 1.9rem; font-weight: 700;
-  color: var(--offwhite); line-height: 1;
-  margin-bottom: 4px;
-}
-.kpi-value.big { font-size: 1.4rem; }
-.kpi-sub { font-size: 0.7rem; color: var(--text-dim); }
-
-/* ─── TOOLBAR ────────────────────────────────────────────────────────────── */
-#toolbar {
-  display: flex; align-items: center;
-  gap: 10px; margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-.filter-btn {
-  font-size: 0.73rem; font-weight: 600;
-  padding: 6px 14px; border-radius: 20px;
-  background: var(--surface); color: var(--muted);
-  border: 1px solid var(--border2);
-  transition: var(--transition);
-  letter-spacing: 0.03em;
-}
-.filter-btn:hover, .filter-btn.active {
-  background: var(--surface3); color: var(--offwhite);
-  border-color: var(--gold);
-}
-#search-box {
-  margin-left: auto;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 6px 16px 6px 36px;
-  color: var(--offwhite);
-  font-size: 0.78rem;
-  width: 220px;
-  position: relative;
-  transition: border-color var(--transition);
-}
-#search-box:focus { outline: none; border-color: var(--gold); }
-#search-wrap { position: relative; }
-#search-wrap::before {
-  content: '⌕';
-  position: absolute; left: 12px; top: 50%;
-  transform: translateY(-50%);
-  color: var(--muted); font-size: 1rem; pointer-events: none;
-}
-
-/* ─── PROJECT TABLE ──────────────────────────────────────────────────────── */
-#projects-table {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.table-head {
-  display: grid;
-  grid-template-columns: 28px 2.2fr 1fr 1fr 0.8fr 1fr 1.2fr 1fr 36px;
-  gap: 0;
-  background: var(--navy-mid);
-  border-bottom: 1px solid var(--border2);
-  padding: 0 16px;
-}
-.th {
-  font-size: 0.65rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--muted);
-  padding: 11px 10px;
-}
-.th:first-child, .th:last-child { padding: 11px 4px; }
-
-/* ─── PROJECT ROW ────────────────────────────────────────────────────────── */
-.project-row-wrap {
-  border-bottom: 1px solid var(--border);
-}
-.project-row-wrap:last-child { border-bottom: none; }
-.project-row {
-  display: grid;
-  grid-template-columns: 28px 2.2fr 1fr 1fr 0.8fr 1fr 1.2fr 1fr 36px;
-  gap: 0;
-  padding: 0 16px;
-  align-items: center;
-  cursor: pointer;
-  transition: background var(--transition);
-  position: relative;
-  border-left: 3px solid transparent;
-}
-.project-row:hover { background: var(--surface2); }
-.project-row.expanded { background: var(--surface2); border-left-color: var(--gold); }
-.project-row.rag-green { border-left-color: var(--green); }
-.project-row.rag-amber { border-left-color: var(--amber); }
-.project-row.rag-red   { border-left-color: var(--red);   }
-.project-row.rag-hold  { border-left-color: var(--hold);  }
-.project-row.rag-completed { border-left-color: var(--muted); }
-
-.td {
-  padding: 13px 10px;
-  font-size: 0.8rem;
-  color: var(--text);
-}
-.td:first-child { padding: 13px 4px; }
-.td:last-child  { padding: 13px 4px; text-align: center; }
-
-.proj-name { font-weight: 600; color: var(--offwhite); line-height: 1.35; }
-.proj-desc { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;
-             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
-
-/* RAG dot */
-.rag-dot {
-  width: 9px; height: 9px; border-radius: 50%;
-  display: inline-block; flex-shrink: 0;
-}
-.rag-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
-.rag-dot.amber { background: var(--amber); }
-.rag-dot.red   { background: var(--red);
-  animation: pulse-red 1.8s ease-in-out infinite; }
-.rag-dot.hold      { background: var(--hold); }
-.rag-dot.completed { background: var(--muted); }
-@keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(224,82,82,0.5); }
-  50%       { box-shadow: 0 0 0 5px rgba(224,82,82,0); }
-}
-
-/* pill badges */
-.pill {
-  display: inline-block;
-  font-size: 0.65rem; font-weight: 600;
-  padding: 3px 9px; border-radius: 20px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.pill-type    { background: rgba(201,162,39,0.15); color: var(--gold); }
-.pill-stage   { background: var(--surface3); color: var(--text-dim); }
-.pill-priority-critical { background: rgba(224,82,82,0.2); color: #ff8080; }
-.pill-priority-high     { background: rgba(240,165,0,0.15); color: var(--amber); }
-.pill-priority-medium   { background: rgba(61,186,110,0.12); color: var(--green); }
-.pill-priority-low      { background: var(--surface3); color: var(--text-dim); }
-
-.deal-val { font-weight: 600; color: var(--offwhite); font-variant-numeric: tabular-nums; }
-.deal-val.zero { color: var(--text-dim); font-weight: 400; }
-
-.next-action-cell { font-size: 0.75rem; color: var(--text-dim); line-height: 1.35; }
-.next-action-due  { font-size: 0.68rem; color: var(--amber); margin-top: 2px; }
-.next-action-due.overdue { color: var(--red); font-weight: 600; }
-
-.chevron { color: var(--muted); font-size: 0.9rem; transition: transform 0.22s; user-select: none; }
-.chevron.open { transform: rotate(90deg); color: var(--gold); }
-
-/* ─── DRAWER ─────────────────────────────────────────────────────────────── */
-.project-drawer {
-  display: none;
-  background: var(--navy);
-  border-top: 1px solid var(--border);
-  padding: 20px 24px 24px 44px;
-}
-.project-drawer.open { display: block; }
-
-/* Drawer header */
-.drawer-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 18px; padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
-}
-.drawer-title { font-size: 0.75rem; font-weight: 700; color: var(--gold);
-                text-transform: uppercase; letter-spacing: 0.08em; }
-.drawer-meta  { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
-
-/* CEO comment button inside drawer */
-.ceo-comment-btn {
-  display: none;
-  font-size: 0.72rem; font-weight: 600;
-  padding: 7px 14px; border-radius: var(--radius-sm);
-  background: rgba(201,162,39,0.15);
-  color: var(--gold);
-  border: 1px solid rgba(201,162,39,0.3);
-  transition: var(--transition);
-  gap: 6px; align-items: center;
-}
-.ceo-comment-btn:hover { background: rgba(201,162,39,0.25); }
-.ceo-comment-btn.reviewer-visible { display: flex; }
-
-/* Workstreams */
-.ws-grid { display: flex; flex-direction: column; gap: 10px; }
-.ws-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  position: relative;
-  border-left: 3px solid var(--border2);
-}
-.ws-card.ws-green  { border-left-color: var(--green); }
-.ws-card.ws-amber  { border-left-color: var(--amber); }
-.ws-card.ws-red    { border-left-color: var(--red); }
-.ws-card.ws-done   { border-left-color: var(--muted); opacity: 0.7; }
-
-.ws-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.ws-name { font-weight: 600; font-size: 0.82rem; color: var(--offwhite); flex: 1; }
-.ws-owner { font-size: 0.7rem; color: var(--text-dim); }
-.ws-type-pill { font-size: 0.62rem; font-weight: 600; padding: 2px 8px;
-                border-radius: 20px; background: var(--surface2); color: var(--muted);
-                text-transform: uppercase; letter-spacing: 0.06em; }
-
-/* Progress bar */
-.progress-wrap { margin-bottom: 10px; }
-.progress-label {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.68rem; color: var(--text-dim); margin-bottom: 4px;
-}
-.progress-pct { font-weight: 600; color: var(--offwhite); }
-.progress-bar {
-  height: 5px; background: var(--surface3);
-  border-radius: 3px; overflow: hidden;
-}
-.progress-fill {
-  height: 100%; border-radius: 3px;
-  background: linear-gradient(90deg, var(--gold), var(--gold-light));
-  transition: width 0.6s ease;
-}
-.progress-fill.complete { background: var(--green); }
-.progress-fill.at-risk  { background: var(--red); }
-
-/* Tasks table inside ws-card */
-.tasks-label {
-  font-size: 0.63rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px;
-}
-.task-list { display: flex; flex-direction: column; gap: 4px; }
-.task-item {
-  display: grid;
-  grid-template-columns: 14px 1fr 90px 80px 80px;
-  gap: 8px; align-items: center;
-  font-size: 0.73rem;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-dim);
-}
-.task-item:last-child { border-bottom: none; }
-.task-check { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
-              border: 2px solid var(--border2); display: flex; align-items: center; justify-content: center; }
-.task-check.done { background: var(--green); border-color: var(--green); }
-.task-check.done::after { content: '✓'; font-size: 8px; color: white; }
-.task-check.overdue { border-color: var(--red); }
-.task-check.inprogress { border-color: var(--amber); }
-.task-desc { color: var(--text); }
-.task-desc.done-text { text-decoration: line-through; color: var(--text-dim); }
-.task-assignee { color: var(--text-dim); font-size: 0.68rem; }
-.task-due { font-size: 0.68rem; }
-.task-due.overdue { color: var(--red); font-weight: 600; }
-.task-status-pill {
-  font-size: 0.6rem; font-weight: 700; padding: 2px 7px;
-  border-radius: 20px; text-align: center;
-  text-transform: uppercase; letter-spacing: 0.05em;
-}
-.status-todo     { background: var(--surface3); color: var(--muted); }
-.status-inprog   { background: rgba(240,165,0,0.15); color: var(--amber); }
-.status-done     { background: rgba(61,186,110,0.12); color: var(--green); }
-.status-overdue  { background: rgba(224,82,82,0.15); color: var(--red); }
-.status-pending  { background: rgba(122,138,170,0.15); color: var(--hold); }
-.status-cancelled{ background: var(--surface3); color: var(--text-dim); }
-
-/* Task add comment btn */
-.task-comment-btn {
-  display: none;
-  font-size: 0.6rem; font-weight: 600; padding: 2px 8px;
-  border-radius: 20px;
-  background: rgba(201,162,39,0.1); color: var(--gold);
-  border: 1px solid rgba(201,162,39,0.25);
-  cursor: pointer; white-space: nowrap;
-}
-.task-comment-btn.reviewer-visible { display: block; }
-
-/* Comments section in drawer */
-.comments-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
-.comment-card {
-  background: rgba(201,162,39,0.05);
-  border: 1px solid rgba(201,162,39,0.15);
-  border-radius: var(--radius-sm);
-  padding: 11px 14px;
-  margin-bottom: 8px;
-  font-size: 0.77rem;
-}
-.comment-card.open-comment   { border-left: 3px solid var(--red); }
-.comment-card.ack-comment    { border-left: 3px solid var(--amber); }
-.comment-card.resolved-comment { border-left: 3px solid var(--green); }
-.comment-top { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
-.comment-by  { font-weight: 700; color: var(--gold); font-size: 0.72rem; }
-.comment-ts  { font-size: 0.68rem; color: var(--text-dim); }
-.comment-type-badge {
-  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-  padding: 2px 7px; border-radius: 20px;
-  background: rgba(201,162,39,0.15); color: var(--gold);
-  letter-spacing: 0.05em;
-}
-.comment-type-badge.direction { background: rgba(224,82,82,0.15); color: #ff9090; }
-.comment-type-badge.approval  { background: rgba(61,186,110,0.15); color: var(--green); }
-.comment-type-badge.query     { background: rgba(122,138,170,0.15); color: var(--hold); }
-.comment-body { color: var(--text); line-height: 1.5; }
-.comment-response { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-                    font-size: 0.72rem; }
-.comment-response-label { color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase;
-                           letter-spacing: 0.08em; margin-bottom: 3px; }
-.comment-response-text { color: var(--green); }
-.no-comments { font-size: 0.73rem; color: var(--text-dim); font-style: italic; padding: 8px 0; }
-
-/* ─── COMMENT MODAL ──────────────────────────────────────────────────────── */
-#comment-modal {
-  display: none; position: fixed; inset: 0; z-index: 998;
-  background: rgba(10,16,30,0.85); backdrop-filter: blur(6px);
-  align-items: center; justify-content: center;
-}
-#comment-modal.show { display: flex; }
-#comment-box {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  padding: 30px 32px;
-  width: 520px; max-width: 95vw;
-  box-shadow: var(--shadow);
-}
-#comment-box h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.15rem; color: var(--offwhite);
-  margin-bottom: 4px;
-}
-#comment-box .modal-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 22px; }
-.form-row { margin-bottom: 14px; }
-.form-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
-              letter-spacing: 0.08em; color: var(--muted); margin-bottom: 5px; display: block; }
-.form-select, .form-input, .form-textarea {
-  width: 100%; padding: 10px 13px;
-  background: var(--navy); color: var(--offwhite);
-  border: 1px solid var(--border2); border-radius: var(--radius-sm);
-  font-size: 0.82rem;
-  transition: border-color var(--transition);
-}
-.form-select:focus, .form-input:focus, .form-textarea:focus {
-  outline: none; border-color: var(--gold);
-}
-.form-textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
-.form-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
-#comment-submit {
-  padding: 10px 22px; background: var(--gold); color: var(--navy);
-  font-weight: 700; font-size: 0.82rem; border-radius: var(--radius-sm);
-  transition: var(--transition);
-}
-#comment-submit:hover { background: var(--gold-light); }
-#comment-cancel {
-  padding: 10px 18px; background: var(--surface2);
-  color: var(--muted); font-size: 0.82rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border2);
-  transition: var(--transition);
-}
-#comment-cancel:hover { color: var(--offwhite); }
-#comment-success {
-  text-align: center; padding: 16px 0; display: none;
-}
-#comment-success .tick { font-size: 2.5rem; color: var(--green); }
-#comment-success p { margin-top: 8px; font-size: 0.82rem; color: var(--text-dim); }
-
-/* ─── FLOATING COMMENT FAB ───────────────────────────────────────────────── */
-#fab {
-  display: none;
-  position: fixed; bottom: 28px; right: 28px;
-  background: var(--gold); color: var(--navy);
-  font-weight: 700; font-size: 0.8rem;
-  padding: 13px 22px; border-radius: 30px;
-  box-shadow: 0 4px 20px rgba(201,162,39,0.4);
-  transition: transform var(--transition), box-shadow var(--transition);
-  z-index: 90;
-  letter-spacing: 0.03em;
-}
-#fab:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,162,39,0.5); }
-#fab.reviewer-visible { display: block; }
-
-/* ─── EMPTY STATE ────────────────────────────────────────────────────────── */
-#empty-state {
-  display: none; padding: 48px;
-  text-align: center;
-  color: var(--text-dim);
-}
-#empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
-#empty-state p { font-size: 0.82rem; }
-
-/* ─── FOOTER ─────────────────────────────────────────────────────────────── */
-#footer {
-  text-align: center; padding: 24px;
-  font-size: 0.68rem; color: var(--text-dim);
-  border-top: 1px solid var(--border);
-  margin-top: 40px;
-}
-
-/* ─── LOADING ────────────────────────────────────────────────────────────── */
-#loading {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  min-height: 40vh; gap: 14px;
-}
-.spinner {
-  width: 32px; height: 32px;
-  border: 3px solid var(--border2);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-#error-msg {
-  display: none; padding: 24px;
-  background: rgba(224,82,82,0.1);
-  border: 1px solid rgba(224,82,82,0.3);
-  border-radius: var(--radius); color: var(--red);
-  font-size: 0.82rem; line-height: 1.6;
-  margin: 24px;
-}
-
-/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
-@media (max-width: 1100px) {
-  #kpi-grid { grid-template-columns: repeat(3, 1fr); }
-}
-@media (max-width: 700px) {
-  #kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .table-head { display: none; }
-  .project-row {
-    grid-template-columns: 1fr;
-    gap: 4px; padding: 14px 16px;
-  }
-  .td { padding: 2px 0; }
-  .td:last-child { text-align: left; }
-}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root[data-theme="dark"]{--navy:#1a2744;--navy-mid:#2f4070;--gold:#c9a227;--gold-light:#e8c84a;--offwhite:#f0ede8;--muted:#a8b0c0;--surface:#1e2d50;--surface2:#243358;--surface3:#2a3d6b;--green:#3dba6e;--amber:#f0a500;--red:#e05252;--hold:#7a8aaa;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8ecf4;--text-dim:#8a96b0;--bg:#1a2744;--shadow:0 4px 24px rgba(0,0,0,0.35);--shadow-sm:0 2px 8px rgba(0,0,0,0.2)}
+:root[data-theme="light"]{--navy:#ffffff;--navy-mid:#e8edf5;--gold:#a67c00;--gold-light:#c9a227;--offwhite:#1a2744;--muted:#5a6680;--surface:#f7f9fc;--surface2:#eef2f8;--surface3:#e2e8f2;--green:#1a9e54;--amber:#c77f00;--red:#cc3838;--hold:#6a7690;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);--text:#1a2744;--text-dim:#5a6680;--bg:#eef2f8;--shadow:0 4px 24px rgba(0,0,0,0.12);--shadow-sm:0 2px 8px rgba(0,0,0,0.08)}
+:root{--radius:10px;--radius-sm:6px;--transition:0.22s ease}
+html{font-size:14px;-webkit-text-size-adjust:100%;max-width:100%;overflow-x:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s;max-width:100%;overflow-x:hidden}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none}
+input,textarea,select{font-family:'Inter',sans-serif}
+a{color:var(--gold);text-decoration:none}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--navy-mid);border-radius:3px}
+#topbar{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:1px solid var(--border2);padding:0 24px;min-height:58px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm);gap:12px;flex-wrap:wrap}
+#topbar-left{display:flex;align-items:center;gap:16px;min-width:0}
+#topbar-logo{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--offwhite);white-space:nowrap}
+#topbar-logo span{color:var(--gold)}
+.topbar-sub{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;border-left:1px solid var(--border2);padding-left:16px;white-space:nowrap}
+#topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#published-badge{font-size:0.7rem;color:var(--muted);background:var(--surface);padding:5px 12px;border-radius:20px;border:1px solid var(--border);white-space:nowrap}
+#published-badge strong{color:var(--gold)}
+#published-badge.stale{border-color:var(--amber);color:var(--amber)}
+#published-badge.stale strong{color:var(--amber)}
+.stale-warn{display:none;font-size:0.62rem;margin-left:6px}
+#published-badge.stale .stale-warn{display:inline}
+.view-toggle{display:flex;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;overflow:hidden}
+.view-toggle button{font-size:0.72rem;font-weight:600;padding:6px 14px;background:transparent;color:var(--muted);transition:var(--transition)}
+.view-toggle button.active{background:var(--gold);color:var(--navy)}
+.icon-btn{font-size:0.9rem;padding:6px 10px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);transition:var(--transition);white-space:nowrap}
+.icon-btn:hover{background:var(--surface3);color:var(--offwhite)}
+#pending-wrap{display:none;align-items:center;gap:8px}
+#pending-wrap.reviewer-visible{display:flex}
+#pending-badge{font-size:0.7rem;font-weight:700;padding:5px 11px;border-radius:20px;background:rgba(201,162,39,0.15);color:var(--gold);border:1px solid rgba(201,162,39,0.3);white-space:nowrap}
+#pending-badge .badge-count{display:inline-block;background:var(--gold);color:var(--navy);font-size:0.62rem;font-weight:800;width:17px;height:17px;border-radius:50%;text-align:center;line-height:17px;margin-right:4px}
+#submit-all-btn{font-size:0.72rem;font-weight:700;padding:6px 14px;border-radius:20px;background:var(--gold);color:var(--navy);transition:var(--transition);white-space:nowrap}
+#submit-all-btn:hover{background:var(--gold-light)}
+#submit-all-btn:disabled{opacity:0.4;cursor:not-allowed}
+#mode-btn{font-size:0.72rem;font-weight:600;padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);transition:var(--transition);white-space:nowrap}
+#mode-btn:hover{background:var(--surface3);color:var(--offwhite)}
+#mode-btn.reviewer-active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+#pin-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(10,16,30,0.88);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+#pin-overlay.show{display:flex}
+#pin-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:34px 38px;width:340px;box-shadow:var(--shadow);text-align:center}
+#pin-box h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:var(--offwhite)}
+#pin-box p{font-size:0.78rem;color:var(--muted);margin-bottom:20px}
+#pin-input{width:100%;padding:12px 16px;background:var(--bg);color:var(--offwhite);border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:1.1rem;letter-spacing:0.3em;text-align:center;margin-bottom:14px}
+#pin-input:focus{outline:none;border-color:var(--gold)}
+#pin-name{width:100%;padding:10px 14px;background:var(--bg);color:var(--offwhite);border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:0.85rem;text-align:center;margin-bottom:14px}
+#pin-name:focus{outline:none;border-color:var(--gold)}
+#pin-submit{width:100%;padding:11px;background:var(--gold);color:var(--navy);font-weight:700;font-size:0.85rem;border-radius:var(--radius-sm);transition:var(--transition)}
+#pin-submit:hover{background:var(--gold-light)}
+#pin-error{font-size:0.75rem;color:var(--red);margin-top:10px;display:none}
+#pin-cancel{margin-top:14px;font-size:0.75rem;color:var(--muted);background:none;text-decoration:underline}
+#main{max-width:1400px;margin:0 auto;padding:24px 24px 60px}
+.section-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px}
+#kpi-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:11px;margin-bottom:14px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;transition:transform var(--transition),box-shadow var(--transition)}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0.5}
+.kpi-card.green-card::before{background:var(--green);opacity:1}
+.kpi-card.amber-card::before{background:var(--amber);opacity:1}
+.kpi-card.red-card::before{background:var(--red);opacity:1}
+.kpi-card.hold-card::before{background:var(--hold);opacity:1}
+.kpi-card.comment-card::before{background:var(--gold);opacity:1}
+.kpi-label{font-size:0.64rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:7px}
+.kpi-value{font-size:1.7rem;font-weight:700;color:var(--offwhite);line-height:1;margin-bottom:4px}
+.kpi-value.big{font-size:1.25rem}
+.kpi-sub{font-size:0.64rem;color:var(--text-dim)}
+#kpi-context{font-size:0.65rem;color:var(--text-dim);margin-bottom:22px;font-style:italic}
+#toolbar{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{font-size:0.72rem;font-weight:600;padding:6px 13px;border-radius:20px;background:var(--surface);color:var(--muted);border:1px solid var(--border2);transition:var(--transition)}
+.filter-btn:hover,.filter-btn.active{background:var(--surface3);color:var(--offwhite);border-color:var(--gold)}
+.sort-select{font-size:0.72rem;font-weight:600;padding:6px 12px;border-radius:20px;background:var(--surface);color:var(--muted);border:1px solid var(--border2);cursor:pointer}
+.sort-select:focus{outline:none;border-color:var(--gold)}
+#search-wrap{position:relative;margin-left:auto}
+#search-wrap::before{content:'\2315';position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1rem;pointer-events:none}
+#search-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:6px 16px 6px 34px;color:var(--offwhite);font-size:0.78rem;width:210px}
+#search-box:focus{outline:none;border-color:var(--gold)}
+#projects-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
+.table-head{display:grid;grid-template-columns:130px 2.1fr 1fr 0.9fr 1fr 1.1fr 1.3fr 0.9fr 40px;background:var(--navy-mid);border-bottom:1px solid var(--border2);padding:0 16px}
+.th{font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--muted);padding:11px 9px}
+.th.sortable{cursor:pointer;user-select:none}
+.th.sortable:hover{color:var(--offwhite)}
+.th .sort-arrow{opacity:0.4;font-size:0.7rem;margin-left:3px}
+.th.sort-active .sort-arrow{opacity:1;color:var(--gold)}
+.project-row-wrap{border-bottom:1px solid var(--border)}
+.project-row-wrap:last-child{border-bottom:none}
+.project-row{display:grid;grid-template-columns:130px 2.1fr 1fr 0.9fr 1fr 1.1fr 1.3fr 0.9fr 40px;padding:0 16px;align-items:center;cursor:pointer;transition:background var(--transition);border-left:3px solid transparent}
+.project-row:hover{background:var(--surface2)}
+.project-row.expanded{background:var(--surface2);border-left-color:var(--gold)}
+.project-row.rag-green{border-left-color:var(--green)}
+.project-row.rag-amber{border-left-color:var(--amber)}
+.project-row.rag-red{border-left-color:var(--red)}
+.project-row.rag-hold{border-left-color:var(--hold)}
+.project-row.rag-completed{border-left-color:var(--muted)}
+.td{padding:13px 9px;font-size:0.8rem;color:var(--text)}
+.td:last-child{padding:13px 4px;text-align:center}
+.rag-chip{display:inline-flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:600;padding:3px 10px 3px 8px;border-radius:20px;white-space:nowrap}
+.rag-chip .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.rag-chip.green{background:rgba(61,186,110,0.14);color:var(--green)}
+.rag-chip.green .dot{background:var(--green)}
+.rag-chip.amber{background:rgba(240,165,0,0.14);color:var(--amber)}
+.rag-chip.amber .dot{background:var(--amber)}
+.rag-chip.red{background:rgba(224,82,82,0.14);color:var(--red)}
+.rag-chip.red .dot{background:var(--red);animation:pulse 1.8s infinite}
+.rag-chip.hold{background:rgba(122,138,170,0.14);color:var(--hold)}
+.rag-chip.hold .dot{background:var(--hold)}
+.rag-chip.completed{background:var(--surface3);color:var(--muted)}
+.rag-chip.completed .dot{background:var(--muted)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(224,82,82,0.5)}50%{box-shadow:0 0 0 5px rgba(224,82,82,0)}}
+.proj-name{font-weight:600;color:var(--offwhite);line-height:1.35}
+.proj-name.completed-name{text-decoration:line-through;opacity:0.6}
+.proj-desc{font-size:0.7rem;color:var(--text-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cmt-flag{display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(201,162,39,0.18);color:var(--gold);margin-left:6px;vertical-align:middle}
+.pill{display:inline-block;font-size:0.64rem;font-weight:600;padding:3px 9px;border-radius:20px;letter-spacing:0.03em;text-transform:uppercase;white-space:nowrap}
+.pill-type{background:rgba(201,162,39,0.15);color:var(--gold)}
+.pill-stage{background:var(--surface3);color:var(--text-dim)}
+.pill-priority-critical{background:var(--red);color:#fff}
+.pill-priority-high{background:rgba(240,165,0,0.18);color:var(--amber)}
+.pill-priority-medium{background:rgba(61,186,110,0.12);color:var(--green)}
+.pill-priority-low{background:var(--surface3);color:var(--text-dim)}
+.deal-val{font-weight:600;color:var(--offwhite);font-variant-numeric:tabular-nums}
+.deal-val.zero{color:var(--text-dim);font-weight:400}
+.next-action-cell{font-size:0.74rem;color:var(--text-dim);line-height:1.35}
+.next-action-due{font-size:0.67rem;color:var(--amber);margin-top:2px}
+.next-action-due.overdue{color:var(--red);font-weight:600}
+.chevron{color:var(--muted);font-size:0.9rem;transition:transform .22s;user-select:none}
+.chevron.open{transform:rotate(90deg);color:var(--gold)}
+.project-drawer{display:none;background:var(--bg);border-top:1px solid var(--border);padding:20px 24px 24px 44px}
+.project-drawer.open{display:block}
+.drawer-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);gap:16px}
+.drawer-headline{font-size:0.7rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.drawer-nextaction{font-size:0.92rem;font-weight:600;color:var(--offwhite);line-height:1.4;margin-bottom:6px}
+.drawer-meta{font-size:0.74rem;color:var(--text-dim);line-height:1.7}
+.drawer-risk{color:var(--red);font-weight:500}
+.ceo-comment-btn{display:none;font-size:0.72rem;font-weight:600;padding:7px 14px;border-radius:var(--radius-sm);background:rgba(201,162,39,0.15);color:var(--gold);border:1px solid rgba(201,162,39,0.3);transition:var(--transition);gap:6px;align-items:center;white-space:nowrap}
+.ceo-comment-btn:hover{background:rgba(201,162,39,0.25)}
+.ceo-comment-btn.reviewer-visible{display:flex}
+.cp-chips{display:flex;flex-wrap:wrap;gap:8px}
+.cp-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:0.73rem}
+.cp-chip .cp-name{font-weight:600;color:var(--offwhite)}
+.cp-chip .cp-role{color:var(--text-dim);font-size:0.68rem}
+.cp-chip a{font-size:0.68rem}
+.ws-grid{display:flex;flex-direction:column;gap:10px}
+.ws-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;border-left:3px solid var(--border2)}
+.ws-card.ws-green{border-left-color:var(--green)}
+.ws-card.ws-amber{border-left-color:var(--amber)}
+.ws-card.ws-red{border-left-color:var(--red)}
+.ws-card.ws-done{border-left-color:var(--muted);opacity:0.75}
+.ws-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.ws-name{font-weight:600;font-size:0.82rem;color:var(--offwhite);flex:1}
+.ws-owner{font-size:0.7rem;color:var(--text-dim)}
+.ws-type-pill{font-size:0.6rem;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--muted);text-transform:uppercase;letter-spacing:0.05em}
+.progress-wrap{margin-bottom:10px}
+.progress-label{display:flex;justify-content:space-between;font-size:0.67rem;color:var(--text-dim);margin-bottom:4px}
+.progress-pct{font-weight:600;color:var(--offwhite)}
+.progress-bar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width .6s ease}
+.progress-fill.complete{background:var(--green)}
+.progress-fill.at-risk{background:var(--red)}
+.tasks-label{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:6px}
+.task-list{display:flex;flex-direction:column;gap:4px}
+.task-item{display:grid;grid-template-columns:14px 1fr 90px 80px 90px;gap:8px;align-items:center;font-size:0.73rem;padding:5px 0;border-bottom:1px solid var(--border);color:var(--text-dim)}
+.task-item:last-child{border-bottom:none}
+.task-check{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center}
+.task-check.done{background:var(--green);border-color:var(--green)}
+.task-check.done::after{content:'\2713';font-size:8px;color:#fff}
+.task-check.overdue{border-color:var(--red)}
+.task-check.inprogress{border-color:var(--amber)}
+.task-desc{color:var(--text)}
+.task-desc.done-text{text-decoration:line-through;color:var(--text-dim)}
+.task-assignee{color:var(--text-dim);font-size:0.68rem}
+.task-due{font-size:0.68rem}
+.task-due.overdue{color:var(--red);font-weight:600}
+.task-status-pill{font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:20px;text-align:center;text-transform:uppercase;letter-spacing:0.04em}
+.status-todo{background:var(--surface3);color:var(--muted)}
+.status-inprog{background:rgba(240,165,0,0.15);color:var(--amber)}
+.status-done{background:rgba(61,186,110,0.12);color:var(--green)}
+.status-overdue{background:rgba(224,82,82,0.15);color:var(--red)}
+.status-pending{background:rgba(122,138,170,0.15);color:var(--hold)}
+.status-cancelled{background:var(--surface3);color:var(--text-dim)}
+.task-comment-btn{display:none;font-size:0.6rem;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(201,162,39,0.1);color:var(--gold);border:1px solid rgba(201,162,39,0.25);white-space:nowrap}
+.task-comment-btn.reviewer-visible{display:block}
+.comments-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.comment-card{background:rgba(201,162,39,0.05);border:1px solid rgba(201,162,39,0.15);border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:8px;font-size:0.77rem}
+.comment-card.open-comment{border-left:3px solid var(--red)}
+.comment-card.ack-comment{border-left:3px solid var(--amber)}
+.comment-card.resolved-comment{border-left:3px solid var(--green)}
+.comment-top{display:flex;gap:10px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.comment-by{font-weight:700;color:var(--gold);font-size:0.72rem}
+.comment-ts{font-size:0.68rem;color:var(--text-dim)}
+.comment-type-badge{font-size:0.6rem;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:rgba(201,162,39,0.15);color:var(--gold);letter-spacing:0.04em}
+.comment-type-badge.direction{background:rgba(224,82,82,0.15);color:#ff9090}
+.comment-type-badge.approval{background:rgba(61,186,110,0.15);color:var(--green)}
+.comment-type-badge.query{background:rgba(122,138,170,0.15);color:var(--hold)}
+.comment-status-badge{margin-left:auto;font-size:0.6rem;font-weight:700}
+.comment-body{color:var(--text);line-height:1.5}
+.comment-response{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.72rem}
+.comment-response-label{color:var(--text-dim);font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px}
+.comment-response-text{color:var(--green)}
+#gantt-view{display:none}
+#gantt-view.active{display:block}
+#dashboard-view.hidden{display:none}
+.gantt-controls{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.gantt-scroll{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto;box-shadow:var(--shadow-sm)}
+.gantt-inner{min-width:760px}
+.gantt-month-row{display:flex;border-bottom:1px solid var(--border2);background:var(--navy-mid);position:sticky;top:0;z-index:5}
+.gantt-label-col{width:260px;flex-shrink:0;padding:10px 14px;font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);border-right:1px solid var(--border2)}
+.gantt-month{flex:1;text-align:center;padding:10px 4px;font-size:0.64rem;font-weight:600;color:var(--muted);border-right:1px solid var(--border);white-space:nowrap}
+.gantt-track-row{display:flex;border-bottom:1px solid var(--border);align-items:stretch;min-height:38px}
+.gantt-track-row:hover{background:var(--surface2)}
+.gantt-track-row.proj-track{background:rgba(201,162,39,0.04)}
+.gantt-row-label{width:260px;flex-shrink:0;padding:8px 14px;font-size:0.74rem;border-right:1px solid var(--border2);display:flex;align-items:center;gap:7px;cursor:pointer}
+.gantt-row-label.lvl-project{font-weight:700;color:var(--offwhite)}
+.gantt-row-label.lvl-workstream{padding-left:30px;font-weight:500;color:var(--text)}
+.gantt-row-label.lvl-task{padding-left:48px;font-size:0.7rem;color:var(--text-dim)}
+.gantt-toggle-icon{font-size:0.7rem;color:var(--muted);width:10px;flex-shrink:0}
+.gantt-bar-area{flex:1;position:relative;display:flex;align-items:center}
+.gantt-bar{position:absolute;height:18px;border-radius:4px;display:flex;align-items:center;padding:0 7px;font-size:0.6rem;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.gantt-bar.lvl-project{background:linear-gradient(90deg,var(--gold),var(--gold-light));color:var(--navy);height:20px}
+.gantt-bar.lvl-workstream{background:var(--navy-mid)}
+.gantt-bar.lvl-workstream.s-green{background:var(--green)}
+.gantt-bar.lvl-workstream.s-amber{background:var(--amber)}
+.gantt-bar.lvl-workstream.s-red{background:var(--red)}
+.gantt-bar.lvl-task{background:var(--surface3);height:12px;color:transparent}
+.gantt-bar.lvl-task.s-done{background:var(--green)}
+.gantt-bar.lvl-task.s-overdue{background:var(--red)}
+.gantt-bar.lvl-task.s-inprog{background:var(--amber)}
+.gantt-today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--red);z-index:4;opacity:0.6}
+.gantt-hidden{display:none}
+.gantt-empty{padding:40px;text-align:center;color:var(--text-dim);font-size:0.82rem}
+#comment-modal{display:none;position:fixed;inset:0;z-index:998;background:rgba(10,16,30,0.85);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+#comment-modal.show{display:flex}
+#comment-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:30px 32px;width:520px;max-width:95vw;box-shadow:var(--shadow);max-height:92vh;overflow-y:auto}
+#comment-box h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--offwhite);margin-bottom:4px}
+#comment-box .modal-sub{font-size:0.75rem;color:var(--muted);margin-bottom:20px}
+.form-row{margin-bottom:13px}
+.form-label{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:5px;display:block}
+.form-select,.form-input,.form-textarea{width:100%;padding:10px 13px;background:var(--bg);color:var(--offwhite);border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:0.82rem}
+.form-select:focus,.form-input:focus,.form-textarea:focus{outline:none;border-color:var(--gold)}
+.form-select.field-error,.form-input.field-error{border-color:var(--red)}
+.form-textarea{resize:vertical;min-height:100px;line-height:1.5}
+.form-row-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+#comment-submit{padding:10px 22px;background:var(--gold);color:var(--navy);font-weight:700;font-size:0.82rem;border-radius:var(--radius-sm);transition:var(--transition)}
+#comment-submit:hover{background:var(--gold-light)}
+#comment-cancel{padding:10px 18px;background:var(--surface2);color:var(--muted);font-size:0.82rem;border-radius:var(--radius-sm);border:1px solid var(--border2)}
+#comment-success{text-align:center;padding:16px 0;display:none}
+#comment-success .tick{font-size:2.5rem;color:var(--green)}
+#comment-success p{margin-top:8px;font-size:0.82rem;color:var(--text-dim)}
+#fab{display:none;position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--navy);font-weight:700;font-size:0.8rem;padding:13px 22px;border-radius:30px;box-shadow:0 4px 20px rgba(201,162,39,0.4);transition:var(--transition);z-index:90}
+#fab:hover{transform:translateY(-2px)}
+#fab.reviewer-visible{display:block}
+#update-banner{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:0.78rem;font-weight:600;padding:11px 20px;border-radius:30px;box-shadow:var(--shadow);z-index:95;cursor:pointer}
+#update-banner.show{display:block;animation:slideup .4s ease}
+@keyframes slideup{from{transform:translate(-50%,40px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+#skeleton{padding:0}
+.sk-kpi-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:11px;margin-bottom:22px}
+.sk-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);height:84px}
+.sk-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);height:52px;margin-bottom:8px}
+.sk-shimmer{background:linear-gradient(90deg,var(--surface) 0%,var(--surface2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+#empty-state{display:none;padding:48px;text-align:center;color:var(--text-dim)}
+#empty-state .empty-icon{font-size:2.5rem;margin-bottom:12px}
+#error-msg{display:none;padding:24px;background:rgba(224,82,82,0.1);border:1px solid rgba(224,82,82,0.3);border-radius:var(--radius);color:var(--red);font-size:0.82rem;line-height:1.6;margin:24px}
+#footer{text-align:center;padding:22px;font-size:0.66rem;color:var(--text-dim);border-top:1px solid var(--border);margin-top:36px;line-height:1.8}
+#changes-panel{background:rgba(61,186,110,0.06);border:1px solid rgba(61,186,110,0.25);border-left:3px solid var(--green);border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:20px}
+#changes-panel .cp-title{font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+#changes-panel .cp-title .cp-close{margin-left:auto;cursor:pointer;color:var(--text-dim);font-weight:400;font-size:0.8rem}
+#changes-panel ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+#changes-panel li{font-size:0.76rem;color:var(--text);padding-left:18px;position:relative}
+#changes-panel li::before{content:'›';position:absolute;left:4px;color:var(--green);font-weight:700}
+.chg-status::before{content:'⇄'!important;color:var(--amber)!important}
+.chg-overdue::before{content:'!'!important;color:var(--red)!important}
+.chg-new::before{content:'+'!important;color:var(--green)!important}
+#footer strong{color:var(--muted)}
+@media print{#topbar,#toolbar,#fab,#update-banner,.ceo-comment-btn,.task-comment-btn,#pending-wrap,#mode-btn,.view-toggle,.icon-btn,#search-wrap{display:none!important}body{background:#fff;color:#000}.project-drawer{display:block!important}.kpi-card,.project-row,.ws-card{break-inside:avoid}#main{max-width:100%;padding:0}:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--text:#000;--offwhite:#000;--text-dim:#444;--border:#ccc;--border2:#999}}
+@media (max-width:1100px){#kpi-grid,.sk-kpi-grid{grid-template-columns:repeat(4,1fr)}.table-head .th:nth-child(6),.table-head .th:nth-child(8),.project-row .td:nth-child(6),.project-row .td:nth-child(8){display:none}.table-head,.project-row{grid-template-columns:120px 2fr 1fr 0.9fr 1fr 40px}}
+@media (max-width:768px){#topbar{padding:10px 14px;gap:8px}#topbar-logo{font-size:1rem}.topbar-sub{display:none}#topbar-right{gap:6px;width:100%;justify-content:flex-start}.icon-btn,#mode-btn,#submit-all-btn{font-size:0.62rem;padding:5px 10px}#published-badge{font-size:0.58rem;padding:4px 8px}#pending-badge{font-size:0.58rem;padding:3px 7px}.view-toggle button{font-size:0.62rem;padding:5px 10px}#main{padding:14px 10px 90px}#kpi-grid,.sk-kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px}.kpi-value{font-size:1.4rem}.kpi-value.big{font-size:1.05rem}#toolbar{gap:5px}.filter-btn{font-size:0.65rem;padding:5px 10px}#search-wrap{width:100%;margin-left:0;margin-top:4px}#search-box{width:100%}.sort-select{width:100%;margin-top:4px}.table-head{display:none}.project-row{display:block;padding:13px 40px 13px 16px;border-left-width:4px;position:relative}.project-row .td{display:block;padding:0;font-size:0.8rem}.project-row .td:nth-child(1){margin-bottom:7px}.project-row .td:nth-child(2){margin-bottom:7px}.project-row .td:nth-child(6),.project-row .td:nth-child(8){display:block}.proj-name{font-size:0.86rem;word-break:break-word}.proj-desc{white-space:normal;max-width:100%;word-break:break-word}.project-row .td:nth-child(3),.project-row .td:nth-child(4),.project-row .td:nth-child(5),.project-row .td:nth-child(6){margin-bottom:5px}.project-row .td:nth-child(3){display:flex;flex-wrap:wrap;gap:4px}.project-row .td:nth-child(7){border-top:1px solid var(--border);padding-top:7px;margin-top:4px;word-break:break-word}.project-row .td:nth-child(8){font-size:0.7rem;color:var(--text-dim);word-break:break-word}.project-row .td:nth-child(9){position:absolute;top:12px;right:12px;padding:0}.project-drawer{padding:14px 12px 18px 14px}.drawer-header{flex-direction:column;gap:10px}.ceo-comment-btn{width:100%;justify-content:center}.ws-name{width:100%}.task-item{display:flex;flex-direction:column;gap:4px;padding:8px 0 8px 22px;position:relative;align-items:flex-start}.task-item .task-check{position:absolute;left:0;top:9px}.task-item .task-desc{font-size:0.74rem;word-break:break-word;width:100%}#comment-modal{align-items:flex-end}#comment-box{width:100%;max-width:100%;border-radius:14px 14px 0 0;padding:20px 16px}.form-row-2col{grid-template-columns:1fr;gap:0}#pin-overlay{align-items:flex-end}#pin-box{width:100%;border-radius:14px 14px 0 0}#fab{bottom:14px;right:14px;padding:11px 16px;font-size:0.72rem}.gantt-label-col,.gantt-row-label{width:150px}.gantt-inner{min-width:560px}}
+@media (max-width:480px){#kpi-grid,.sk-kpi-grid{gap:6px}.kpi-card{padding:11px}.kpi-value{font-size:1.2rem}#topbar-logo{font-size:0.9rem}}
 </style>
 </head>
 <body>
 
-<!-- ── TOPBAR ──────────────────────────────────────────────────────────────── -->
 <div id="topbar">
   <div id="topbar-left">
     <div id="topbar-logo">CF <span>Deal Monitor</span></div>
     <div id="dept-label" class="topbar-sub">CEO's Office</div>
   </div>
   <div id="topbar-right">
-    <div id="published-badge">
-      Data as of <strong id="pub-date">—</strong>
+    <div class="view-toggle">
+      <button id="vt-dashboard" class="active" onclick="switchView('dashboard')">Dashboard</button>
+      <button id="vt-gantt" onclick="switchView('gantt')">Timeline</button>
+    </div>
+    <div id="published-badge">Data as of <strong id="pub-date">—</strong><span class="stale-warn">⚠ stale</span></div>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark">🌙</button>
+    <button class="icon-btn" onclick="window.print()" title="Print / Export PDF">🖨</button>
+    <div id="pending-wrap">
+      <div id="pending-badge"><span class="badge-count" id="pending-count">0</span>pending</div>
+      <button id="submit-all-btn" onclick="submitAllComments()" disabled>↓ Submit All</button>
     </div>
     <button id="mode-btn" onclick="toggleReviewerMode()">🔒 Reviewer Mode</button>
   </div>
 </div>
 
-<!-- ── PIN OVERLAY ─────────────────────────────────────────────────────────── -->
 <div id="pin-overlay">
   <div id="pin-box">
     <h3>Reviewer Access</h3>
-    <p>Enter your PIN to enable commenting and directions.</p>
-    <input type="password" id="pin-input" maxlength="8" placeholder="••••"
-           onkeydown="if(event.key==='Enter') submitPin()">
+    <p>Enter your PIN and name to enable commenting.</p>
+    <input type="password" id="pin-input" maxlength="8" placeholder="••••" onkeydown="if(event.key==='Enter')submitPin()">
+    <input type="text" id="pin-name" placeholder="Your name (e.g. CEO, COO)" value="">
     <button id="pin-submit" onclick="submitPin()">UNLOCK</button>
     <div id="pin-error">Incorrect PIN. Please try again.</div>
     <button id="pin-cancel" onclick="closePinOverlay()">Cancel</button>
   </div>
 </div>
 
-<!-- ── COMMENT MODAL ────────────────────────────────────────────────────────── -->
 <div id="comment-modal">
   <div id="comment-box">
     <h3>Add Comment / Direction</h3>
-    <p class="modal-sub">Your comment will be saved and synced back to AP on the next publish.</p>
+    <p class="modal-sub">Added to your pending queue. Submit all at once when done.</p>
     <div id="comment-form">
       <div class="form-row-2col">
-        <div class="form-row">
-          <label class="form-label">Comment Level</label>
+        <div class="form-row"><label class="form-label">Level</label>
           <select class="form-select" id="cm-level" onchange="updateCommentLevel()">
-            <option value="General">General</option>
-            <option value="Project">Project</option>
-            <option value="Workstream">Workstream</option>
-            <option value="Task">Task</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-label">Type</label>
+            <option value="General">General</option><option value="Project">Project</option>
+            <option value="Workstream">Workstream</option><option value="Task">Task</option>
+          </select></div>
+        <div class="form-row"><label class="form-label">Type</label>
           <select class="form-select" id="cm-type">
-            <option value="Direction">Direction</option>
-            <option value="Query">Query</option>
-            <option value="Approval">Approval</option>
-            <option value="Flag for Discussion">Flag for Discussion</option>
-            <option value="Concern">Concern</option>
-            <option value="Information Only">Information Only</option>
-          </select>
-        </div>
+            <option>Direction</option><option>Query</option><option>Approval</option>
+            <option>Flag for Discussion</option><option>Concern</option><option>Information Only</option>
+          </select></div>
       </div>
-      <div class="form-row" id="cm-project-row">
-        <label class="form-label">Project</label>
-        <select class="form-select" id="cm-project"></select>
-      </div>
-      <div class="form-row" id="cm-ws-row" style="display:none">
-        <label class="form-label">Workstream</label>
-        <select class="form-select" id="cm-workstream"></select>
-      </div>
-      <div class="form-row" id="cm-task-row" style="display:none">
-        <label class="form-label">Task</label>
-        <select class="form-select" id="cm-task"></select>
-      </div>
-      <div class="form-row">
-        <label class="form-label">Comment / Direction</label>
-        <textarea class="form-textarea" id="cm-text"
-          placeholder="Type your comment, direction, query or approval here..."></textarea>
-      </div>
-      <div class="form-row">
-        <label class="form-label">Your Name</label>
-        <input type="text" class="form-input" id="cm-author" value="CEO" placeholder="e.g. CEO, COO">
-      </div>
+      <div class="form-row" id="cm-project-row"><label class="form-label">Project</label>
+        <select class="form-select" id="cm-project" onchange="populateCommentWorkstreams()"></select></div>
+      <div class="form-row" id="cm-ws-row" style="display:none"><label class="form-label">Workstream</label>
+        <select class="form-select" id="cm-workstream" onchange="populateCommentTasks()"></select></div>
+      <div class="form-row" id="cm-task-row" style="display:none"><label class="form-label">Task</label>
+        <select class="form-select" id="cm-task"></select></div>
+      <div class="form-row"><label class="form-label">Comment / Direction</label>
+        <textarea class="form-textarea" id="cm-text" placeholder="Type your comment..."></textarea></div>
     </div>
-    <div id="comment-success">
-      <div class="tick">✓</div>
-      <p>Comment saved. AP will be notified on the next dashboard refresh.<br>
-         It will be synced into Excel on the next publish.</p>
-    </div>
+    <div id="comment-success"><div class="tick">✓</div>
+      <p>Added to your pending queue.<br>Click <strong style="color:var(--gold)">Submit All</strong> in the top bar when done.</p></div>
     <div class="modal-footer" id="comment-footer">
       <button id="comment-cancel" onclick="closeCommentModal()">Cancel</button>
-      <button id="comment-submit" onclick="submitComment()">Save Comment</button>
+      <button id="comment-submit" onclick="submitComment()">Add to Queue</button>
     </div>
   </div>
 </div>
 
-<!-- ── FAB ─────────────────────────────────────────────────────────────────── -->
-<button id="fab" class="reviewer-visible" onclick="openCommentModal('General','','','')">
-  + Add Direction
-</button>
+<button id="fab" onclick="openCommentModal('General','','','')">+ Add Direction</button>
+<div id="update-banner" onclick="location.reload()">↻ New update available — tap to refresh</div>
 
-<!-- ── MAIN ─────────────────────────────────────────────────────────────────── -->
 <div id="main">
-
-  <!-- Loading state -->
-  <div id="loading">
-    <div class="spinner"></div>
-    <div style="font-size:0.8rem;color:var(--muted)">Loading dashboard data...</div>
+  <div id="skeleton">
+    <div class="sk-kpi-grid"><div class="sk-card sk-shimmer"></div><div class="sk-card sk-shimmer"></div><div class="sk-card sk-shimmer"></div><div class="sk-card sk-shimmer"></div><div class="sk-card sk-shimmer"></div><div class="sk-card sk-shimmer"></div><div class="sk-card sk-shimmer"></div></div>
+    <div class="sk-row sk-shimmer"></div><div class="sk-row sk-shimmer"></div><div class="sk-row sk-shimmer"></div><div class="sk-row sk-shimmer"></div>
   </div>
-
-  <!-- Error state -->
   <div id="error-msg"></div>
-
-  <!-- Dashboard content (hidden until data loads) -->
   <div id="dashboard-content" style="display:none">
-
-    <!-- KPI Row -->
-    <div class="section-label">Portfolio Overview</div>
-    <div id="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-label">Total Projects</div>
-        <div class="kpi-value" id="kpi-total">—</div>
-        <div class="kpi-sub" id="kpi-active-sub">— active</div>
+    <div id="dashboard-view">
+      <div id="changes-panel" style="display:none"></div>
+      <div class="section-label">Portfolio Overview</div>
+      <div id="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Total Projects</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub" id="kpi-active-sub">— active</div></div>
+        <div class="kpi-card green-card"><div class="kpi-label">On Track</div><div class="kpi-value" id="kpi-green" style="color:var(--green)">—</div><div class="kpi-sub">Green status</div></div>
+        <div class="kpi-card amber-card"><div class="kpi-label">Needs Attention</div><div class="kpi-value" id="kpi-amber" style="color:var(--amber)">—</div><div class="kpi-sub">Amber status</div></div>
+        <div class="kpi-card red-card"><div class="kpi-label">At Risk</div><div class="kpi-value" id="kpi-red" style="color:var(--red)">—</div><div class="kpi-sub">Red status</div></div>
+        <div class="kpi-card hold-card"><div class="kpi-label">On Hold</div><div class="kpi-value" id="kpi-hold" style="color:var(--hold)">—</div><div class="kpi-sub">Paused</div></div>
+        <div class="kpi-card"><div class="kpi-label">Pipeline Value</div><div class="kpi-value big" id="kpi-value">—</div><div class="kpi-sub" id="kpi-currency-sub">Active pipeline (RM)</div></div>
+        <div class="kpi-card comment-card"><div class="kpi-label">Open Directions</div><div class="kpi-value" id="kpi-comments" style="color:var(--gold)">—</div><div class="kpi-sub" id="kpi-overdue-sub">— overdue tasks</div></div>
       </div>
-      <div class="kpi-card green-card">
-        <div class="kpi-label">On Track</div>
-        <div class="kpi-value" id="kpi-green" style="color:var(--green)">—</div>
-        <div class="kpi-sub">Green status</div>
+      <div id="kpi-context">Showing portfolio-wide totals across all projects.</div>
+      <div id="toolbar">
+        <button class="filter-btn active" data-filter="all" onclick="filterProjects('all',this)">All</button>
+        <button class="filter-btn" data-filter="green" onclick="filterProjects('green',this)">🟢 Green</button>
+        <button class="filter-btn" data-filter="amber" onclick="filterProjects('amber',this)">🟡 Amber</button>
+        <button class="filter-btn" data-filter="red" onclick="filterProjects('red',this)">🔴 Red</button>
+        <button class="filter-btn" data-filter="active" onclick="filterProjects('active',this)">Active</button>
+        <button class="filter-btn" data-filter="completed" onclick="filterProjects('completed',this)">Completed</button>
+        <select class="sort-select" id="sort-select" onchange="setSort(this.value)">
+          <option value="default">Sort: Default</option>
+          <option value="priority">Priority (high→low)</option>
+          <option value="deal_value">Deal Value (high→low)</option>
+          <option value="next_due">Next Action Due (soonest)</option>
+          <option value="target">Target Date (soonest)</option>
+          <option value="name">Name (A→Z)</option>
+        </select>
+        <button class="icon-btn" id="collapse-all-btn" onclick="collapseAll()" style="display:none">⊼ Collapse all</button>
+        <div id="search-wrap"><input type="text" id="search-box" placeholder="Search projects..." oninput="searchProjects(this.value)"></div>
       </div>
-      <div class="kpi-card amber-card">
-        <div class="kpi-label">Needs Attention</div>
-        <div class="kpi-value" id="kpi-amber" style="color:var(--amber)">—</div>
-        <div class="kpi-sub">Amber status</div>
-      </div>
-      <div class="kpi-card red-card">
-        <div class="kpi-label">At Risk</div>
-        <div class="kpi-value" id="kpi-red" style="color:var(--red)">—</div>
-        <div class="kpi-sub">Red status</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Pipeline Value</div>
-        <div class="kpi-value big" id="kpi-value">—</div>
-        <div class="kpi-sub" id="kpi-currency-sub">Active deals (RM)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Action Items</div>
-        <div class="kpi-value" id="kpi-overdue" style="color:var(--amber)">—</div>
-        <div class="kpi-sub" id="kpi-comments-sub">— open CEO comments</div>
-      </div>
-    </div>
-
-    <!-- Toolbar -->
-    <div id="toolbar">
-      <div class="section-label" style="margin:0;margin-right:6px">Projects</div>
-      <button class="filter-btn active" onclick="filterProjects('all',this)">All</button>
-      <button class="filter-btn" onclick="filterProjects('green',this)">🟢 Green</button>
-      <button class="filter-btn" onclick="filterProjects('amber',this)">🟡 Amber</button>
-      <button class="filter-btn" onclick="filterProjects('red',this)">🔴 Red</button>
-      <button class="filter-btn" onclick="filterProjects('active',this)">Active</button>
-      <button class="filter-btn" onclick="filterProjects('completed',this)">Completed</button>
-      <div id="search-wrap">
-        <input type="text" id="search-box" placeholder="Search projects..."
-               oninput="searchProjects(this.value)">
+      <div id="projects-table">
+        <div class="table-head">
+          <div class="th">Status</div>
+          <div class="th sortable" data-sort="name" onclick="setSort('name')">Project <span class="sort-arrow">↕</span></div>
+          <div class="th">Type / Stage</div>
+          <div class="th sortable" data-sort="priority" onclick="setSort('priority')">Priority <span class="sort-arrow">↕</span></div>
+          <div class="th">Status</div>
+          <div class="th sortable" data-sort="deal_value" onclick="setSort('deal_value')">Deal Value <span class="sort-arrow">↕</span></div>
+          <div class="th sortable" data-sort="next_due" onclick="setSort('next_due')">Next Action <span class="sort-arrow">↕</span></div>
+          <div class="th">Lead / Advisors</div>
+          <div class="th"></div>
+        </div>
+        <div id="projects-body"></div>
+        <div id="empty-state"><div class="empty-icon">📂</div><p>No projects match the current filter.</p></div>
       </div>
     </div>
-
-    <!-- Projects Table -->
-    <div id="projects-table">
-      <div class="table-head">
-        <div class="th"></div>
-        <div class="th">Project</div>
-        <div class="th">Type / Stage</div>
-        <div class="th">Priority</div>
-        <div class="th">Status</div>
-        <div class="th">Deal Value</div>
-        <div class="th">Next Action</div>
-        <div class="th">Lead / Advisors</div>
-        <div class="th"></div>
+    <div id="gantt-view">
+      <div class="section-label">Project Timeline</div>
+      <div class="gantt-controls">
+        <button class="filter-btn active" data-glevel="all" onclick="setGanttLevel('all',this)">All levels</button>
+        <button class="filter-btn" data-glevel="project" onclick="setGanttLevel('project',this)">Projects only</button>
+        <button class="filter-btn" data-glevel="workstream" onclick="setGanttLevel('workstream',this)">+ Workstreams</button>
+        <span style="font-size:0.66rem;color:var(--text-dim);margin-left:8px">Tip: click a project row to expand/collapse</span>
       </div>
-      <div id="projects-body"></div>
-      <div id="empty-state">
-        <div class="empty-icon">📂</div>
-        <p>No projects match the current filter.</p>
-      </div>
+      <div class="gantt-scroll"><div class="gantt-inner" id="gantt-inner"></div></div>
     </div>
-
-  </div><!-- /dashboard-content -->
-</div><!-- /main -->
+  </div>
+</div>
 
 <div id="footer">
-  CF Deal Monitor — <span id="footer-company">CEO's Office</span> &nbsp;|&nbsp;
-  Built for internal use only &nbsp;|&nbsp;
-  <span id="footer-pub"></span>
+  <strong id="footer-company">—</strong> &nbsp;·&nbsp; <span id="footer-dept">—</span><br>
+  <span id="footer-pub">—</span> &nbsp;·&nbsp; Dashboard <span id="footer-version">v2.0</span> &nbsp;·&nbsp; Internal use only
 </div>
-
 <script>
-// ═══════════════════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════════════════
-let DATA          = null;   // full parsed dashboard_data.json
-let IS_REVIEWER   = false;  // is the user in reviewer mode
-let FILTER        = 'all';  // current filter
-let SEARCH        = '';     // current search string
-let pendingComments = [];   // comments queued to be saved
+const EMAILJS_CONFIG={enabled:false,publicKey:"YOUR_PUBLIC_KEY",serviceId:"YOUR_SERVICE_ID",templateId:"YOUR_TEMPLATE_ID",toEmail:"andrewpreemadass@dohcapital.my"};
+let DATA=null,IS_REVIEWER=false,REVIEWER_NAME="CEO",FILTER='all',SEARCH='',SORT='default',SORT_DIR={};
+let pendingComments=[],GANTT_LEVEL='all',ganttExpanded={},lastPublishedIso=null,CURRENT_VIEW='dashboard';
 
-// Pre-fill context for comment modal
-let cmContext = { level: 'General', projectId: '', wsId: '', taskId: '' };
+if(EMAILJS_CONFIG.enabled&&window.emailjs){try{emailjs.init({publicKey:EMAILJS_CONFIG.publicKey});}catch(e){}}
 
-// ═══════════════════════════════════════════════════════════════════════════
-// LOAD DATA
-// ═══════════════════════════════════════════════════════════════════════════
-async function loadData() {
-  try {
-    // Try to load from same folder as dashboard.html
-    const urls = [
-      'dashboard_data.json',
-      './dashboard_data.json',
-    ];
-    let resp = null;
-    for (const url of urls) {
-      try {
-        resp = await fetch(url + '?t=' + Date.now());
-        if (resp.ok) break;
-      } catch(e) { /* try next */ }
-    }
-    if (!resp || !resp.ok) throw new Error('dashboard_data.json not found.');
+// THEME
+function toggleTheme(){const h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);document.getElementById('theme-btn').textContent=n==='dark'?'🌙':'☀️';try{localStorage.setItem('cf_theme',n);}catch(e){}}
+(function(){let s='dark';try{s=localStorage.getItem('cf_theme')||'dark';}catch(e){}document.documentElement.setAttribute('data-theme',s);})();
 
-    DATA = await resp.json();
-    renderDashboard();
+// VIEW SWITCH
+function switchView(v){CURRENT_VIEW=v;
+  document.getElementById('vt-dashboard').classList.toggle('active',v==='dashboard');
+  document.getElementById('vt-gantt').classList.toggle('active',v==='gantt');
+  document.getElementById('dashboard-view').classList.toggle('hidden',v!=='dashboard');
+  document.getElementById('gantt-view').classList.toggle('active',v==='gantt');
+  if(v==='gantt')renderGantt();
+}
 
-  } catch (err) {
-    document.getElementById('loading').style.display = 'none';
-    const errEl = document.getElementById('error-msg');
-    errEl.style.display = 'block';
-    errEl.innerHTML = `
-      <strong>Could not load dashboard data.</strong><br><br>
-      ${err.message}<br><br>
-      <strong>To fix this:</strong><br>
-      1. Make sure <code>dashboard_data.json</code> is in the same folder as this HTML file.<br>
-      2. Run <code>publish.py</code> first to generate the data file.<br>
-      3. If opening this file directly from your desktop, try opening it from the
-         OneDrive folder instead.<br><br>
-      <em>Technical detail: ${err}</em>
-    `;
+// LOAD
+async function loadData(isRefresh){
+  try{
+    let resp=null;
+    for(const url of ['dashboard_data.json','./dashboard_data.json']){try{resp=await fetch(url+'?t='+Date.now());if(resp.ok)break;}catch(e){}}
+    if(!resp||!resp.ok)throw new Error('dashboard_data.json not found.');
+    const nd=await resp.json();
+    if(isRefresh){const ni=(nd.meta||{}).published_at_iso;if(ni&&lastPublishedIso&&ni!==lastPublishedIso){document.getElementById('update-banner').classList.add('show');}return;}
+    DATA=nd;lastPublishedIso=(DATA.meta||{}).published_at_iso||null;renderDashboard();
+  }catch(err){
+    if(isRefresh)return;
+    document.getElementById('skeleton').style.display='none';
+    const e=document.getElementById('error-msg');e.style.display='block';
+    e.innerHTML='<strong>Could not load dashboard data.</strong><br><br>'+err.message+'<br><br><strong>To fix:</strong><br>1. Ensure dashboard_data.json is in the same folder.<br>2. Run publish.py first.<br>3. Open via start_dashboard.bat, not by double-clicking.<br><br><em>'+err+'</em>';
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// RENDER DASHBOARD
-// ═══════════════════════════════════════════════════════════════════════════
-function renderDashboard() {
-  if (!DATA) return;
-
-  // Hide loading, show content
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('dashboard-content').style.display = 'block';
-
-  const m = DATA.meta || {};
-  const s = DATA.summary || {};
-
-  // Topbar
-  document.getElementById('pub-date').textContent =
-    m.published_at || 'Unknown';
-  document.getElementById('dept-label').textContent =
-    m.department || "CEO's Office";
-  document.title = `CF Deal Monitor — ${m.company_name || ''}`;
-
-  // Footer
-  document.getElementById('footer-company').textContent =
-    m.company_name || '';
-  document.getElementById('footer-pub').textContent =
-    `Published by ${m.published_by || 'AP'} on ${m.published_at || '—'}`;
-
-  // KPIs
-  document.getElementById('kpi-total').textContent  = s.total_projects || 0;
-  document.getElementById('kpi-active-sub').textContent =
-    `${s.active_projects || 0} active`;
-  document.getElementById('kpi-green').textContent  = s.green   || 0;
-  document.getElementById('kpi-amber').textContent  = s.amber   || 0;
-  document.getElementById('kpi-red').textContent    = s.red     || 0;
-  document.getElementById('kpi-overdue').textContent= s.overdue_tasks || 0;
-  document.getElementById('kpi-comments-sub').textContent =
-    `${s.open_comments || 0} open CEO comments`;
-
-  // Deal value — format as RM millions if >= 1M
-  const val = s.total_deal_value_rm || 0;
-  const cur = m.currency || 'RM';
-  let valStr;
-  if (val === 0) {
-    valStr = '—';
-  } else if (val >= 1000000) {
-    valStr = (val / 1000000).toFixed(1) + 'M';
-  } else {
-    valStr = val.toLocaleString();
-  }
-  document.getElementById('kpi-value').textContent = valStr;
-  document.getElementById('kpi-currency-sub').textContent =
-    `Active deals (${cur})`;
-
-  // Populate comment modal project dropdown
+function renderDashboard(){
+  if(!DATA)return;
+  document.getElementById('skeleton').style.display='none';
+  document.getElementById('dashboard-content').style.display='block';
+  const m=DATA.meta||{};
+  document.getElementById('theme-btn').textContent=document.documentElement.getAttribute('data-theme')==='dark'?'🌙':'☀️';
+  document.getElementById('pub-date').textContent=m.published_at||'Unknown';
+  document.getElementById('dept-label').textContent=m.department||"CEO's Office";
+  document.title=`CF Deal Monitor — ${m.company_name||''}`;
+  applyStaleness(m);
+  document.getElementById('footer-company').textContent=m.company_name||'';
+  document.getElementById('footer-dept').textContent=m.department||'';
+  document.getElementById('footer-version').textContent='v'+(m.dashboard_version||'2.0');
+  document.getElementById('footer-pub').textContent=`Last published by ${m.published_by||'AP'} on ${m.published_at||'—'}`;
+  updateFilterCounts();
+  renderChanges();
+  renderKPIs();
   populateCommentProjects();
-
-  // Render projects
   renderProjects();
+  renderGantt();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// RENDER PROJECTS
-// ═══════════════════════════════════════════════════════════════════════════
-function renderProjects() {
-  const body = document.getElementById('projects-body');
-  body.innerHTML = '';
-
-  const projects = getFilteredProjects();
-
-  document.getElementById('empty-state').style.display =
-    projects.length === 0 ? 'block' : 'none';
-
-  projects.forEach(proj => {
-    const wrap   = document.createElement('div');
-    wrap.className = 'project-row-wrap';
-    wrap.id = `wrap-${proj.project_id}`;
-    wrap.innerHTML = buildProjectRow(proj) + buildDrawer(proj);
-    body.appendChild(wrap);
-  });
+function applyStaleness(m){
+  const b=document.getElementById('published-badge');b.classList.remove('stale');
+  const days=parseInt(m.staleness_days||7);
+  if(m.published_at_iso){const t=new Date(m.published_at_iso);const age=(Date.now()-t.getTime())/(864e5);if(age>days)b.classList.add('stale');}
 }
 
-function getFilteredProjects() {
-  if (!DATA || !DATA.projects) return [];
-  return DATA.projects.filter(p => {
-    const status = (p.overall_status || '').toLowerCase();
-    const search = SEARCH.toLowerCase();
+// FILTER COUNTS (AD)
+function updateFilterCounts(){
+  const ps=DATA.projects||[];
+  const cnt=(st)=>ps.filter(p=>(p.overall_status||'').toLowerCase()===st).length;
+  const active=ps.filter(p=>!['completed','cancelled','on hold'].includes((p.overall_status||'').toLowerCase())).length;
+  const setLbl=(f,txt)=>{const b=document.querySelector(`.filter-btn[data-filter="${f}"]`);if(b)b.textContent=txt;};
+  setLbl('all',`All (${ps.length})`);
+  setLbl('green',`🟢 Green (${cnt('green')})`);
+  setLbl('amber',`🟡 Amber (${cnt('amber')})`);
+  setLbl('red',`🔴 Red (${cnt('red')})`);
+  setLbl('active',`Active (${active})`);
+  setLbl('completed',`Completed (${cnt('completed')})`);
+}
 
-    // Filter
-    if (FILTER === 'green'     && status !== 'green')     return false;
-    if (FILTER === 'amber'     && status !== 'amber')     return false;
-    if (FILTER === 'red'       && status !== 'red')       return false;
-    if (FILTER === 'completed' && status !== 'completed') return false;
-    if (FILTER === 'active'    &&
-        ['completed','cancelled','on hold'].includes(status)) return false;
+// WHAT'S CHANGED (AB)
+function renderChanges(){
+  const panel=document.getElementById('changes-panel');
+  const changes=(DATA&&DATA.changes)||[];
+  if(!changes.length){panel.style.display='none';return;}
+  const typeClass={status:'chg-status',overdue:'chg-overdue',new:'chg-new'};
+  panel.innerHTML=`<div class="cp-title">↻ Changes since last publish <span class="cp-close" onclick="document.getElementById('changes-panel').style.display='none'">✕ dismiss</span></div><ul>${changes.map(c=>`<li class="${typeClass[c.type]||''}">${escHtml(c.text)}</li>`).join('')}</ul>`;
+  panel.style.display='block';
+}
 
-    // Search
-    if (search) {
-      const haystack = [
-        p.project_name, p.project_type, p.stage,
-        p.project_lead, p.brief_description, p.next_action
-      ].join(' ').toLowerCase();
-      if (!haystack.includes(search)) return false;
-    }
+function renderKPIs(){
+  const s=DATA.summary||{},m=DATA.meta||{},cur=m.currency||'RM';
+  const scoped=getFilteredProjects();
+  const uf=(FILTER!=='all'||SEARCH!=='');
+  const stat=(arr,st)=>arr.filter(p=>(p.overall_status||'').toLowerCase()===st).length;
+  const total=uf?scoped.length:(s.total_projects||0);
+  const green=uf?stat(scoped,'green'):(s.green||0);
+  const amber=uf?stat(scoped,'amber'):(s.amber||0);
+  const red=uf?stat(scoped,'red'):(s.red||0);
+  const hold=uf?stat(scoped,'on hold'):(s.on_hold||0);
+  const active=uf?scoped.filter(p=>!['completed','cancelled'].includes((p.overall_status||'').toLowerCase())).length:(s.active_projects||0);
+  let dv=0;(uf?scoped:(DATA.projects||[])).forEach(p=>{const st=(p.overall_status||'').toLowerCase();if(['completed','cancelled'].includes(st))return;const v=parseFloat(p.deal_value_rm);if(!isNaN(v)&&v>0)dv+=v;});
+  document.getElementById('kpi-total').textContent=total;
+  document.getElementById('kpi-active-sub').textContent=`${active} active`;
+  document.getElementById('kpi-green').textContent=green;
+  document.getElementById('kpi-amber').textContent=amber;
+  document.getElementById('kpi-red').textContent=red;
+  document.getElementById('kpi-hold').textContent=hold;
+  document.getElementById('kpi-comments').textContent=s.open_comments||0;
+  document.getElementById('kpi-overdue-sub').textContent=`${s.overdue_tasks||0} overdue tasks`;
+  let vs='—';if(dv>0)vs=dv>=1e6?(dv/1e6).toFixed(1)+'M':dv.toLocaleString();
+  document.getElementById('kpi-value').textContent=vs;
+  document.getElementById('kpi-currency-sub').textContent=`Active pipeline (${cur})`;
+  document.getElementById('kpi-context').textContent=uf?`Showing totals for the current filter/search (${scoped.length} project${scoped.length!==1?'s':''}). Overdue tasks & open directions remain portfolio-wide.`:'Showing portfolio-wide totals across all projects.';
+}
+
+// FILTER/SORT/SEARCH
+function getFilteredProjects(){
+  if(!DATA||!DATA.projects)return [];
+  let list=DATA.projects.filter(p=>{
+    const st=(p.overall_status||'').toLowerCase(),q=SEARCH.toLowerCase();
+    if(FILTER==='green'&&st!=='green')return false;
+    if(FILTER==='amber'&&st!=='amber')return false;
+    if(FILTER==='red'&&st!=='red')return false;
+    if(FILTER==='completed'&&st!=='completed')return false;
+    if(FILTER==='active'&&['completed','cancelled','on hold'].includes(st))return false;
+    if(q){const hay=[p.project_name,p.project_type,p.stage,p.project_lead,p.brief_description,p.next_action].join(' ').toLowerCase();if(!hay.includes(q))return false;}
     return true;
   });
+  return sortProjects(list);
 }
 
-function buildProjectRow(proj) {
-  const status  = (proj.overall_status || '').toLowerCase();
-  const ragClass= ragStatusClass(status);
-  const ragDot  = `<span class="rag-dot ${ragDotClass(status)}"></span>`;
-
-  const dealVal = proj.deal_value_rm;
-  const cur     = (DATA.meta || {}).currency || 'RM';
-  let dealStr   = '—';
-  if (dealVal && dealVal !== '' && dealVal !== 0) {
-    const num = parseFloat(dealVal);
-    if (!isNaN(num) && num > 0) {
-      dealStr = num >= 1000000
-        ? `${cur} ${(num/1000000).toFixed(1)}M`
-        : `${cur} ${num.toLocaleString()}`;
+function sortProjects(list){
+  if(SORT==='default')return list;
+  const prioRank={critical:0,high:1,medium:2,low:3};
+  const parseD=(s)=>{if(!s)return Infinity;const d=parseDate(s);return d?d.getTime():Infinity;};
+  const arr=[...list];
+  arr.sort((a,b)=>{
+    switch(SORT){
+      case 'priority':return (prioRank[(a.priority||'').toLowerCase()]??9)-(prioRank[(b.priority||'').toLowerCase()]??9);
+      case 'deal_value':return (parseFloat(b.deal_value_rm)||0)-(parseFloat(a.deal_value_rm)||0);
+      case 'next_due':return parseD(a.next_action_due)-parseD(b.next_action_due);
+      case 'target':return parseD(a.target_completion)-parseD(b.target_completion);
+      case 'name':return (a.project_name||'').localeCompare(b.project_name||'');
+      default:return 0;
     }
-  }
+  });
+  return arr;
+}
 
-  const nextDue     = proj.next_action_due || '';
-  const isOverdue   = nextDue && isPastDate(nextDue);
-  const dueClass    = isOverdue ? 'overdue' : '';
-  const typeLabel   = proj.project_type === 'Other' && proj['type_—_if_other,_specify_here']
-    ? proj['type_—_if_other,_specify_here']
-    : (proj.project_type || '—');
+function setSort(v){
+  SORT=v;
+  const sel=document.getElementById('sort-select');if(sel)sel.value=v;
+  document.querySelectorAll('.th.sortable').forEach(th=>{th.classList.toggle('sort-active',th.getAttribute('data-sort')===v);});
+  renderProjects();
+}
+function filterProjects(f,btn){FILTER=f;document.querySelectorAll('.filter-btn[data-filter]').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderKPIs();renderProjects();}
+function searchProjects(v){SEARCH=v;renderKPIs();renderProjects();}
 
-  return `
-  <div class="project-row ${ragClass}" id="row-${proj.project_id}"
-       onclick="toggleDrawer('${proj.project_id}')">
-    <div class="td">${ragDot}</div>
-    <div class="td">
-      <div class="proj-name">${escHtml(proj.project_name || '')}</div>
-      <div class="proj-desc">${escHtml(proj.brief_description || '')}</div>
-    </div>
-    <div class="td">
-      <span class="pill pill-type">${escHtml(typeLabel)}</span><br>
-      <span class="pill pill-stage" style="margin-top:4px">${escHtml(proj.stage || '—')}</span>
-    </div>
-    <div class="td">
-      <span class="pill ${priorityClass(proj.priority)}">${escHtml(proj.priority || '—')}</span>
-    </div>
-    <div class="td">
-      <span style="font-size:0.75rem;font-weight:600;color:${ragTextColor(status)}">
-        ${proj.overall_status || '—'}
-      </span>
-    </div>
-    <div class="td">
-      <span class="deal-val ${dealVal == 0 || dealVal === '' ? 'zero' : ''}">${dealStr}</span>
-    </div>
-    <div class="td next-action-cell">
-      ${escHtml(proj.next_action || '—')}
-      ${nextDue ? `<div class="next-action-due ${dueClass}">⏱ ${nextDue}</div>` : ''}
-    </div>
-    <div class="td" style="font-size:0.75rem">
-      <div>${escHtml(proj.project_lead || '—')}</div>
-      <div style="color:var(--text-dim);margin-top:2px;font-size:0.68rem">
-        ${escHtml(proj.external_advisors || '')}
-      </div>
-    </div>
-    <div class="td">
-      <span class="chevron" id="chev-${proj.project_id}">›</span>
-    </div>
+// RENDER PROJECTS
+function renderProjects(){
+  const body=document.getElementById('projects-body');body.innerHTML='';
+  const projects=getFilteredProjects();
+  document.getElementById('empty-state').style.display=projects.length===0?'block':'none';
+  projects.forEach(proj=>{
+    try{
+      const wrap=document.createElement('div');wrap.className='project-row-wrap';
+      wrap.id=`wrap-${cssId(proj.project_id)}`;
+      wrap.innerHTML=buildProjectRow(proj)+buildDrawer(proj);
+      body.appendChild(wrap);
+    }catch(e){console.error('Row render failed for',proj.project_id,e);}
+  });
+  updateCollapseBtn();
+}
+
+function buildProjectRow(proj){
+  const status=(proj.overall_status||'').toLowerCase();
+  const cur=(DATA.meta||{}).currency||'RM';
+  let dealStr='—';const dv=parseFloat(proj.deal_value_rm);
+  if(!isNaN(dv)&&dv>0)dealStr=dv>=1e6?`${cur} ${(dv/1e6).toFixed(1)}M`:`${cur} ${dv.toLocaleString()}`;
+  const nextDue=proj.next_action_due||'';const od=nextDue&&isPastDate(nextDue);
+  const cmtCount=(DATA.ceo_comments||[]).filter(c=>c.project_ref===proj.project_name&&(c.status||'').toLowerCase()==='open').length;
+  const cmtFlag=cmtCount>0?`<span class="cmt-flag">✎ ${cmtCount}</span>`:'';
+  const nameClass=status==='completed'?'proj-name completed-name':'proj-name';
+  return `<div class="project-row ${ragRowClass(status)}" id="row-${cssId(proj.project_id)}" onclick="toggleDrawer('${jsId(proj.project_id)}')">
+    <div class="td">${ragChip(status)}</div>
+    <div class="td"><div class="${nameClass}">${escHtml(proj.project_name||'')}${cmtFlag}</div><div class="proj-desc">${escHtml(proj.brief_description||'')}</div></div>
+    <div class="td"><span class="pill pill-type">${escHtml(proj.project_type||'—')}</span><br><span class="pill pill-stage" style="margin-top:4px;display:inline-block">${escHtml(proj.stage||'—')}</span></div>
+    <div class="td"><span class="pill ${prioClass(proj.priority)}">${escHtml(proj.priority||'—')}</span></div>
+    <div class="td"><span style="font-size:0.75rem;font-weight:600;color:${ragColor(status)}">${escHtml(proj.overall_status||'—')}</span></div>
+    <div class="td"><span class="deal-val ${(!dv||dv<=0)?'zero':''}">${dealStr}</span></div>
+    <div class="td next-action-cell">${escHtml(proj.next_action||'—')}${nextDue?`<div class="next-action-due ${od?'overdue':''}">⏱ ${escHtml(nextDue)}</div>`:''}</div>
+    <div class="td" style="font-size:0.75rem"><div>${escHtml(proj.project_lead||'—')}</div><div style="color:var(--text-dim);margin-top:2px;font-size:0.68rem">${escHtml(proj.external_advisors||'')}</div></div>
+    <div class="td"><span class="chevron" id="chev-${cssId(proj.project_id)}">›</span></div>
   </div>`;
 }
 
-function buildDrawer(proj) {
-  const projId = proj.project_id;
-
-  // Get workstreams for this project
-  const wsList = (DATA.workstreams || [])
-    .filter(w => w.project_id === projId);
-
-  // Get all tasks for this project
-  const allTasks = DATA.tasks || [];
-
-  // Get counterparties
-  const cps = (DATA.counterparties || [])
-    .filter(c => c.project_id === projId);
-
-  // Get CEO comments for this project
-  const projComments = (DATA.ceo_comments || [])
-    .filter(c => c.project_id === projId && c.comment_level === 'Project');
-
-  let wsHtml = '';
-  if (wsList.length === 0) {
-    wsHtml = '<div style="color:var(--text-dim);font-size:0.78rem;font-style:italic">No workstreams added yet.</div>';
-  } else {
-    wsList.forEach(ws => {
-      const tasks = allTasks.filter(t => t.workstream_id === ws.workstream_id);
-      const wsComments = (DATA.ceo_comments || [])
-        .filter(c => c.workstream_id === ws.workstream_id && c.comment_level === 'Workstream');
-      wsHtml += buildWsCard(ws, tasks, wsComments, projId);
-    });
-  }
-
-  // Counterparties row
-  let cpHtml = '';
-  if (cps.length > 0) {
-    cpHtml = `
-    <div style="margin-bottom:16px">
-      <div class="tasks-label" style="margin-bottom:8px">Counterparties</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        ${cps.map(cp => `
-          <div style="background:var(--surface);border:1px solid var(--border);
-                      border-radius:var(--radius-sm);padding:8px 12px;font-size:0.73rem">
-            <div style="font-weight:600;color:var(--offwhite)">${escHtml(cp.counterparty_name||'')}</div>
-            <div style="color:var(--text-dim)">${escHtml(cp.counterparty_role||'')} · ${escHtml(cp.pic_name||'')}</div>
-          </div>`).join('')}
-      </div>
-    </div>`;
-  }
-
-  const projCommentsHtml = buildCommentsSection(projComments, 'project');
-
-  return `
-  <div class="project-drawer" id="drawer-${projId}">
+function buildDrawer(proj){
+  const pid=proj.project_id;
+  const wsList=(DATA.workstreams||[]).filter(w=>w.project_id===pid);
+  const allTasks=DATA.tasks||[];
+  const cps=proj.counterparties||[];
+  const projComments=(DATA.ceo_comments||[]).filter(c=>c.project_ref===proj.project_name&&(c.comment_level||'')==='Project');
+  let wsHtml='';
+  if(wsList.length===0)wsHtml='<div style="color:var(--text-dim);font-size:0.78rem;font-style:italic">No workstreams added yet.</div>';
+  else wsList.forEach(ws=>{const tasks=allTasks.filter(t=>t.workstream_id===ws.workstream_id);const wsC=(DATA.ceo_comments||[]).filter(c=>c.workstream_ref===ws.workstream_name&&(c.comment_level||'')==='Workstream');wsHtml+=buildWsCard(ws,tasks,wsC,pid);});
+  let cpHtml='';
+  if(cps.length>0)cpHtml=`<div style="margin-bottom:16px"><div class="tasks-label" style="margin-bottom:8px">Counterparties</div><div class="cp-chips">${cps.map(cp=>`<div class="cp-chip"><div class="cp-name">${escHtml(cp.counterparty_name||'')}</div><div class="cp-role">${escHtml(cp.counterparty_role||'')}${cp.pic_name?' · '+escHtml(cp.pic_name):''}</div>${cp.pic_email?`<a href="mailto:${escHtml(cp.pic_email)}">${escHtml(cp.pic_email)}</a>`:''}</div>`).join('')}</div></div>`;
+  const projCommentsHtml=buildCommentsSection(projComments);
+  const headline=proj.next_action?`<div class="drawer-headline">Next Action</div><div class="drawer-nextaction">${escHtml(proj.next_action)}${proj.next_action_due?` <span style="font-size:0.74rem;color:${isPastDate(proj.next_action_due)?'var(--red)':'var(--amber)'}">(due ${escHtml(proj.next_action_due)})</span>`:''}</div>`:`<div class="drawer-headline">Overview</div><div class="drawer-nextaction">${escHtml(proj.brief_description||proj.project_name||'')}</div>`;
+  return `<div class="project-drawer" id="drawer-${cssId(pid)}">
     <div class="drawer-header">
-      <div>
-        <div class="drawer-title">${escHtml(proj.project_name||'')}</div>
-        <div class="drawer-meta">
-          Lead: ${escHtml(proj.project_lead||'—')} &nbsp;·&nbsp;
-          Initiated: ${escHtml(proj.date_initiated||'—')} &nbsp;·&nbsp;
-          Target: ${escHtml(proj.target_completion||'—')} &nbsp;·&nbsp;
-          Confidentiality: ${escHtml(proj.confidentiality_level||'—')}
-          ${proj.key_risk ? `<br>⚠ Key Risk: ${escHtml(proj.key_risk)}` : ''}
-        </div>
-      </div>
-      <button class="ceo-comment-btn ${IS_REVIEWER ? 'reviewer-visible' : ''}"
-              id="proj-cmt-btn-${projId}"
-              onclick="openCommentModal('Project','${projId}','','')">
-        ✎ Add Direction
-      </button>
+      <div>${headline}<div class="drawer-meta">Lead: ${escHtml(proj.project_lead||'—')} · Initiated: ${escHtml(proj.date_initiated||'—')} · Target: ${escHtml(proj.target_completion||'—')} · Confidentiality: ${escHtml(proj.confidentiality_level||'—')}${proj.key_risk?`<br><span class="drawer-risk">⚠ Key Risk: ${escHtml(proj.key_risk)}</span>`:''}${proj.external_advisors?`<br>Advisors: ${escHtml(proj.external_advisors)}`:''}</div></div>
+      <button class="ceo-comment-btn ${IS_REVIEWER?'reviewer-visible':''}" onclick="event.stopPropagation();openCommentModal('Project','${jsId(pid)}','','')">✎ Add Direction</button>
     </div>
-
     ${cpHtml}
-
     <div class="tasks-label">Workstreams &amp; Tasks</div>
     <div class="ws-grid">${wsHtml}</div>
-
     ${projCommentsHtml}
   </div>`;
 }
 
-function buildWsCard(ws, tasks, wsComments, projId) {
-  const pct    = parseInt(ws.completion_pct) || 0;
-  const status = (ws.status || '').toLowerCase();
-  let wsClass  = '';
-  if (status === 'green' || status === 'completed') wsClass = pct >= 100 ? 'ws-done' : 'ws-green';
-  else if (status === 'amber' || status === 'in progress') wsClass = 'ws-amber';
-  else if (status === 'red') wsClass = 'ws-red';
-
-  const fillClass = pct >= 100 ? 'complete' : (status === 'red' ? 'at-risk' : '');
-
-  let tasksHtml = '';
-  if (tasks.length > 0) {
-    const taskItems = tasks.map(t => buildTaskItem(t, projId, ws.workstream_id)).join('');
-    tasksHtml = `
-      <div class="tasks-label" style="margin-top:10px">Tasks</div>
-      <div class="task-list">${taskItems}</div>`;
-  }
-
-  const wsCommentsHtml = buildCommentsSection(wsComments, 'workstream');
-
-  return `
-  <div class="ws-card ${wsClass}">
-    <div class="ws-top">
-      <div class="ws-name">${escHtml(ws.workstream_name||'')}</div>
-      <span class="ws-type-pill">${escHtml(ws.workstream_type||'')}</span>
-      <div class="ws-owner">👤 ${escHtml(ws.owner||'—')}</div>
-      <button class="task-comment-btn ${IS_REVIEWER ? 'reviewer-visible' : ''}"
-              onclick="event.stopPropagation();openCommentModal('Workstream','${projId}','${ws.workstream_id}','')">
-        ✎ Comment
-      </button>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-label">
-        <span>Progress</span>
-        <span class="progress-pct">${pct}%</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill ${fillClass}" style="width:${pct}%"></div>
-      </div>
-    </div>
-    ${ws.key_deliverable ? `<div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:6px">📋 ${escHtml(ws.key_deliverable)}</div>` : ''}
-    ${ws.target_completion ? `<div style="font-size:0.68rem;color:var(--muted)">Target: ${escHtml(ws.target_completion)}${ws.actual_completion ? ' · Completed: '+escHtml(ws.actual_completion) : ''}</div>` : ''}
+function buildWsCard(ws,tasks,wsComments,pid){
+  const pct=parseInt(ws.completion_pct)||0;const status=(ws.status||'').toLowerCase();
+  let wsClass='';
+  if(status==='completed'||pct>=100)wsClass='ws-done';
+  else if(status==='green')wsClass='ws-green';
+  else if(status==='amber'||status==='in progress')wsClass='ws-amber';
+  else if(status==='red')wsClass='ws-red';
+  const fillClass=pct>=100?'complete':(status==='red'?'at-risk':'');
+  let tasksHtml='';
+  if(tasks.length>0)tasksHtml=`<div class="tasks-label" style="margin-top:10px">Tasks</div><div class="task-list">${tasks.map(t=>buildTaskItem(t,pid,ws.workstream_id)).join('')}</div>`;
+  return `<div class="ws-card ${wsClass}">
+    <div class="ws-top"><div class="ws-name">${escHtml(ws.workstream_name||'')}</div><span class="ws-type-pill">${escHtml(ws.workstream_type||'')}</span><div class="ws-owner">👤 ${escHtml(ws.owner||'—')}</div><button class="task-comment-btn ${IS_REVIEWER?'reviewer-visible':''}" onclick="event.stopPropagation();openCommentModal('Workstream','${jsId(pid)}','${jsId(ws.workstream_id)}','')">✎ Comment</button></div>
+    <div class="progress-wrap"><div class="progress-label"><span>Progress</span><span class="progress-pct">${pct}%</span></div><div class="progress-bar"><div class="progress-fill ${fillClass}" style="width:${pct}%"></div></div></div>
+    ${ws.target_completion?`<div style="font-size:0.68rem;color:var(--muted)">Target: ${escHtml(ws.target_completion)}${ws.actual_completion?' · Done: '+escHtml(ws.actual_completion):''}</div>`:''}
     ${tasksHtml}
-    ${wsCommentsHtml}
+    ${buildCommentsSection(wsComments)}
   </div>`;
 }
 
-function buildTaskItem(task, projId, wsId) {
-  const status   = (task.status || '').toLowerCase();
-  const isDone   = status === 'done';
-  const isOverdue= !isDone && task.due_date && isPastDate(task.due_date);
-
-  let checkClass = '';
-  if (isDone)         checkClass = 'done';
-  else if (isOverdue) checkClass = 'overdue';
-  else if (status.includes('progress')) checkClass = 'inprogress';
-
-  let statusClass = 'status-todo';
-  if (status === 'done')                        statusClass = 'status-done';
-  else if (status.includes('progress'))         statusClass = 'status-inprog';
-  else if (isOverdue || status === 'overdue')   statusClass = 'status-overdue';
-  else if (status.includes('pending'))          statusClass = 'status-pending';
-  else if (status === 'cancelled')              statusClass = 'status-cancelled';
-
-  return `
-  <div class="task-item">
-    <div class="task-check ${checkClass}"></div>
-    <div class="task-desc ${isDone ? 'done-text' : ''}">${escHtml(task.task_description||'')}</div>
-    <div class="task-assignee">${escHtml(task.assignee||'—')}</div>
-    <div class="task-due ${isOverdue ? 'overdue' : ''}">${escHtml(task.due_date||'—')}</div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <span class="task-status-pill ${statusClass}">${escHtml(task.status||'—')}</span>
-      <button class="task-comment-btn ${IS_REVIEWER ? 'reviewer-visible' : ''}"
-              onclick="event.stopPropagation();openCommentModal('Task','${projId}','${wsId}','${task.task_id}')">
-        ✎
-      </button>
-    </div>
-  </div>`;
+function buildTaskItem(task,pid,wsId){
+  const status=(task.status||'').toLowerCase();const isDone=status==='done';
+  const isOverdue=!isDone&&task.due_date&&isPastDate(task.due_date);
+  let chk='';if(isDone)chk='done';else if(isOverdue)chk='overdue';else if(status.includes('progress'))chk='inprogress';
+  let sc='status-todo';
+  if(status==='done')sc='status-done';else if(status.includes('progress'))sc='status-inprog';
+  else if(isOverdue||status==='overdue')sc='status-overdue';else if(status.includes('pending'))sc='status-pending';
+  else if(status==='cancelled')sc='status-cancelled';
+  return `<div class="task-item"><div class="task-check ${chk}"></div><div class="task-desc ${isDone?'done-text':''}">${escHtml(task.task_description||'')}</div><div class="task-assignee">${escHtml(task.assignee||'—')}</div><div class="task-due ${isOverdue?'overdue':''}">${escHtml(task.due_date||'—')}</div><div style="display:flex;align-items:center;gap:6px"><span class="task-status-pill ${sc}">${escHtml(task.status||'—')}</span><button class="task-comment-btn ${IS_REVIEWER?'reviewer-visible':''}" onclick="event.stopPropagation();openCommentModal('Task','${jsId(pid)}','${jsId(wsId)}','${jsId(task.task_id)}')">✎</button></div></div>`;
 }
 
-function buildCommentsSection(comments, scope) {
-  if (!comments || comments.length === 0) return '';
-  const html = comments.map(c => {
-    const status  = (c.status || '').toLowerCase();
-    const cClass  = status === 'resolved' ? 'resolved-comment'
-                  : status === 'acknowledged' ? 'ack-comment' : 'open-comment';
-    const typeVal = (c.comment_type || '').toLowerCase();
-    const tClass  = typeVal === 'direction' ? 'direction'
-                  : typeVal === 'approval'  ? 'approval'
-                  : typeVal === 'query'     ? 'query' : '';
-    return `
-    <div class="comment-card ${cClass}">
-      <div class="comment-top">
-        <span class="comment-by">${escHtml(c.commented_by||'CEO')}</span>
-        <span class="comment-ts">${escHtml(c.timestamp||'')}</span>
-        <span class="comment-type-badge ${tClass}">${escHtml(c.comment_type||'')}</span>
-        <span style="margin-left:auto;font-size:0.65rem;font-weight:700;
-                     color:${status==='resolved'?'var(--green)':status==='acknowledged'?'var(--amber)':'var(--red)'}">
-          ${(c.status||'').toUpperCase()}
-        </span>
-      </div>
-      <div class="comment-body">${escHtml(c.comment_text||'')}</div>
-      ${c.ap_response ? `
-        <div class="comment-response">
-          <div class="comment-response-label">AP's Response</div>
-          <div class="comment-response-text">${escHtml(c.ap_response)}</div>
-        </div>` : ''}
-    </div>`;
+function buildCommentsSection(comments){
+  if(!comments||comments.length===0)return '';
+  const html=comments.map(c=>{
+    const st=(c.status||'').toLowerCase();
+    const cc=st==='resolved'?'resolved-comment':st==='acknowledged'?'ack-comment':'open-comment';
+    const tv=(c.comment_type||'').toLowerCase();
+    const tc=tv==='direction'?'direction':tv==='approval'?'approval':tv==='query'?'query':'';
+    return `<div class="comment-card ${cc}"><div class="comment-top"><span class="comment-by">${escHtml(c.commented_by||'CEO')}</span><span class="comment-ts">${escHtml(c.timestamp||'')}</span><span class="comment-type-badge ${tc}">${escHtml(c.comment_type||'')}</span><span class="comment-status-badge" style="color:${st==='resolved'?'var(--green)':st==='acknowledged'?'var(--amber)':'var(--red)'}">${escHtml((c.status||'').toUpperCase())}</span></div><div class="comment-body">${escHtml(c.comment_text||'')}</div>${c.ap_response?`<div class="comment-response"><div class="comment-response-label">AP's Response</div><div class="comment-response-text">${escHtml(c.ap_response)}</div></div>`:''}</div>`;
   }).join('');
-
-  return `
-  <div class="comments-section">
-    <div class="tasks-label">CEO Directions &amp; Comments</div>
-    ${html}
-  </div>`;
+  return `<div class="comments-section"><div class="tasks-label">CEO Directions &amp; Comments</div>${html}</div>`;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// DRAWER TOGGLE
-// ═══════════════════════════════════════════════════════════════════════════
-function toggleDrawer(projId) {
-  const drawer = document.getElementById(`drawer-${projId}`);
-  const row    = document.getElementById(`row-${projId}`);
-  const chev   = document.getElementById(`chev-${projId}`);
-  if (!drawer) return;
-
-  const isOpen = drawer.classList.contains('open');
-
-  // Close all drawers first
-  document.querySelectorAll('.project-drawer').forEach(d => d.classList.remove('open'));
-  document.querySelectorAll('.project-row').forEach(r => r.classList.remove('expanded'));
-  document.querySelectorAll('.chevron').forEach(c => c.classList.remove('open'));
-
-  if (!isOpen) {
-    drawer.classList.add('open');
-    row.classList.add('expanded');
-    chev.classList.add('open');
-    // Scroll into view smoothly
-    setTimeout(() => drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
-  }
+// DRAWER
+function toggleDrawer(pid){
+  const d=document.getElementById(`drawer-${cssId(pid)}`),r=document.getElementById(`row-${cssId(pid)}`),c=document.getElementById(`chev-${cssId(pid)}`);
+  if(!d)return;const open=d.classList.contains('open');
+  if(open){d.classList.remove('open');r.classList.remove('expanded');c.classList.remove('open');}
+  else{d.classList.add('open');r.classList.add('expanded');c.classList.add('open');setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'nearest'}),50);}
+  updateCollapseBtn();
 }
+function collapseAll(){document.querySelectorAll('.project-drawer').forEach(d=>d.classList.remove('open'));document.querySelectorAll('.project-row').forEach(r=>r.classList.remove('expanded'));document.querySelectorAll('.chevron').forEach(c=>c.classList.remove('open'));updateCollapseBtn();}
+function updateCollapseBtn(){const any=document.querySelectorAll('.project-drawer.open').length>0;const b=document.getElementById('collapse-all-btn');if(b)b.style.display=any?'inline-block':'none';}
 
-// ═══════════════════════════════════════════════════════════════════════════
-// FILTER & SEARCH
-// ═══════════════════════════════════════════════════════════════════════════
-function filterProjects(filter, btn) {
-  FILTER = filter;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderProjects();
+// REVIEWER MODE
+function toggleReviewerMode(){
+  if(IS_REVIEWER){IS_REVIEWER=false;document.getElementById('mode-btn').textContent='🔒 Reviewer Mode';document.getElementById('mode-btn').classList.remove('reviewer-active');document.getElementById('fab').classList.remove('reviewer-visible');document.getElementById('pending-wrap').classList.remove('reviewer-visible');renderProjects();}
+  else{document.getElementById('pin-overlay').classList.add('show');document.getElementById('pin-input').focus();}
 }
-
-function searchProjects(val) {
-  SEARCH = val;
-  renderProjects();
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// REVIEWER MODE / PIN
-// ═══════════════════════════════════════════════════════════════════════════
-function toggleReviewerMode() {
-  if (IS_REVIEWER) {
-    // Lock
-    IS_REVIEWER = false;
-    document.getElementById('mode-btn').textContent  = '🔒 Reviewer Mode';
-    document.getElementById('mode-btn').classList.remove('reviewer-active');
-    document.getElementById('fab').classList.remove('reviewer-visible');
-    updateReviewerVisibility();
-  } else {
-    // Show PIN overlay
-    document.getElementById('pin-overlay').classList.add('show');
-    document.getElementById('pin-input').focus();
-  }
-}
-
-function submitPin() {
-  const input = document.getElementById('pin-input').value;
-  const pin   = ((DATA && DATA.meta && DATA.meta.reviewer_pin) || '1234').toString();
-  if (input === pin) {
-    IS_REVIEWER = true;
+function submitPin(){
+  const inp=document.getElementById('pin-input').value;
+  const pin=((DATA&&DATA.meta&&DATA.meta.reviewer_pin)||'1234').toString();
+  if(inp===pin){
+    IS_REVIEWER=true;
+    const nm=document.getElementById('pin-name').value.trim();REVIEWER_NAME=nm||'CEO';
     document.getElementById('pin-overlay').classList.remove('show');
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-error').style.display = 'none';
-    document.getElementById('mode-btn').innerHTML = '🔓 Reviewer Mode';
-    document.getElementById('mode-btn').classList.add('reviewer-active');
-    document.getElementById('fab').classList.add('reviewer-visible');
-    updateReviewerVisibility();
-  } else {
-    document.getElementById('pin-error').style.display = 'block';
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-input').focus();
-  }
+    document.getElementById('pin-input').value='';document.getElementById('pin-error').style.display='none';
+    document.getElementById('mode-btn').innerHTML='🔓 Reviewer Mode';document.getElementById('mode-btn').classList.add('reviewer-active');
+    document.getElementById('fab').classList.add('reviewer-visible');document.getElementById('pending-wrap').classList.add('reviewer-visible');
+    updatePendingCount();renderProjects();
+  }else{document.getElementById('pin-error').style.display='block';document.getElementById('pin-input').value='';document.getElementById('pin-input').focus();}
 }
+function closePinOverlay(){document.getElementById('pin-overlay').classList.remove('show');document.getElementById('pin-input').value='';document.getElementById('pin-error').style.display='none';}
 
-function closePinOverlay() {
-  document.getElementById('pin-overlay').classList.remove('show');
-  document.getElementById('pin-input').value = '';
-  document.getElementById('pin-error').style.display = 'none';
-}
-
-function updateReviewerVisibility() {
-  // Re-render everything so reviewer buttons appear/disappear correctly
-  renderProjects();
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 // COMMENT MODAL
-// ═══════════════════════════════════════════════════════════════════════════
-function populateCommentProjects() {
-  const sel = document.getElementById('cm-project');
-  if (!sel || !DATA) return;
-  sel.innerHTML = '<option value="">— Select project —</option>';
-  (DATA.projects || []).forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.project_id;
-    opt.textContent = `${p.project_id} — ${p.project_name}`;
-    sel.appendChild(opt);
-  });
-}
-
-function updateCommentLevel() {
-  const level = document.getElementById('cm-level').value;
-  const projRow = document.getElementById('cm-project-row');
-  const wsRow   = document.getElementById('cm-ws-row');
-  const taskRow = document.getElementById('cm-task-row');
-
-  projRow.style.display = level === 'General' ? 'none' : 'block';
-  wsRow.style.display   = ['Workstream','Task'].includes(level) ? 'block' : 'none';
-  taskRow.style.display = level === 'Task' ? 'block' : 'none';
-
-  if (['Workstream','Task'].includes(level)) populateCommentWorkstreams();
-  if (level === 'Task') populateCommentTasks();
-}
-
-function populateCommentWorkstreams() {
-  const projId = document.getElementById('cm-project').value;
-  const sel    = document.getElementById('cm-workstream');
-  sel.innerHTML = '<option value="">— Select workstream —</option>';
-  (DATA.workstreams || [])
-    .filter(w => !projId || w.project_id === projId)
-    .forEach(w => {
-      const opt = document.createElement('option');
-      opt.value = w.workstream_id;
-      opt.textContent = `${w.workstream_id} — ${w.workstream_name}`;
-      sel.appendChild(opt);
-    });
-}
-
-function populateCommentTasks() {
-  const wsId = document.getElementById('cm-workstream').value;
-  const sel  = document.getElementById('cm-task');
-  sel.innerHTML = '<option value="">— Select task —</option>';
-  (DATA.tasks || [])
-    .filter(t => !wsId || t.workstream_id === wsId)
-    .forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t.task_id;
-      opt.textContent = `${t.task_id} — ${t.task_description}`;
-      sel.appendChild(opt);
-    });
-}
-
-function openCommentModal(level, projId, wsId, taskId) {
-  if (!IS_REVIEWER) return;
-
-  document.getElementById('cm-level').value   = level;
-  document.getElementById('cm-author').value  = 'CEO';
-  document.getElementById('cm-text').value    = '';
-  document.getElementById('comment-success').style.display = 'none';
-  document.getElementById('comment-form').style.display    = 'block';
-  document.getElementById('comment-footer').style.display  = 'flex';
-
+function populateCommentProjects(){const sel=document.getElementById('cm-project');if(!sel||!DATA)return;sel.innerHTML='<option value="">— Select project —</option>';(DATA.projects||[]).forEach(p=>{const o=document.createElement('option');o.value=p.project_id;o.textContent=p.project_name;sel.appendChild(o);});}
+function updateCommentLevel(){const lvl=document.getElementById('cm-level').value;document.getElementById('cm-project-row').style.display=lvl==='General'?'none':'block';document.getElementById('cm-ws-row').style.display=['Workstream','Task'].includes(lvl)?'block':'none';document.getElementById('cm-task-row').style.display=lvl==='Task'?'block':'none';if(['Workstream','Task'].includes(lvl))populateCommentWorkstreams();if(lvl==='Task')populateCommentTasks();}
+function populateCommentWorkstreams(){const pid=document.getElementById('cm-project').value,sel=document.getElementById('cm-workstream');sel.innerHTML='<option value="">— Select workstream —</option>';(DATA.workstreams||[]).filter(w=>!pid||w.project_id===pid).forEach(w=>{const o=document.createElement('option');o.value=w.workstream_id;o.textContent=w.workstream_name;sel.appendChild(o);});}
+function populateCommentTasks(){const wid=document.getElementById('cm-workstream').value,sel=document.getElementById('cm-task');sel.innerHTML='<option value="">— Select task —</option>';(DATA.tasks||[]).filter(t=>!wid||t.workstream_id===wid).forEach(t=>{const o=document.createElement('option');o.value=t.task_id;o.textContent=t.task_description;sel.appendChild(o);});}
+function openCommentModal(level,pid,wid,tid){
+  if(!IS_REVIEWER)return;
+  document.getElementById('cm-level').value=level;document.getElementById('cm-text').value='';
+  document.getElementById('comment-success').style.display='none';document.getElementById('comment-form').style.display='block';document.getElementById('comment-footer').style.display='flex';
+  document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));
   updateCommentLevel();
-
-  // Pre-fill IDs if provided
-  if (projId) document.getElementById('cm-project').value = projId;
-  if (wsId)   { populateCommentWorkstreams(); document.getElementById('cm-workstream').value = wsId; }
-  if (taskId) { populateCommentTasks();       document.getElementById('cm-task').value = taskId; }
-
+  if(pid)document.getElementById('cm-project').value=pid;
+  if(wid){populateCommentWorkstreams();document.getElementById('cm-workstream').value=wid;}
+  if(tid){populateCommentTasks();document.getElementById('cm-task').value=tid;}
   document.getElementById('comment-modal').classList.add('show');
-  setTimeout(() => document.getElementById('cm-text').focus(), 100);
+  setTimeout(()=>document.getElementById('cm-text').focus(),100);
 }
-
-function closeCommentModal() {
-  document.getElementById('comment-modal').classList.remove('show');
+function closeCommentModal(){document.getElementById('comment-modal').classList.remove('show');}
+function submitComment(){
+  const level=document.getElementById('cm-level').value,type=document.getElementById('cm-type').value,text=document.getElementById('cm-text').value.trim();
+  const projSel=document.getElementById('cm-project'),wsSel=document.getElementById('cm-workstream'),taskSel=document.getElementById('cm-task');
+  const pid=projSel.value,wid=wsSel.value,tid=taskSel.value;
+  // validation (N)
+  let bad=false;
+  if(!text){alert('Please enter a comment.');return;}
+  if(['Project','Workstream','Task'].includes(level)&&!pid){projSel.classList.add('field-error');bad=true;}
+  if(['Workstream','Task'].includes(level)&&!wid){wsSel.classList.add('field-error');bad=true;}
+  if(level==='Task'&&!tid){taskSel.classList.add('field-error');bad=true;}
+  if(bad){alert('Please select the project/workstream/task this comment applies to.');return;}
+  const projName=pid?(DATA.projects.find(p=>p.project_id===pid)||{}).project_name||'':'';
+  const wsName=wid?(DATA.workstreams.find(w=>w.workstream_id===wid)||{}).workstream_name||'':'';
+  const taskName=tid?(DATA.tasks.find(t=>t.task_id===tid)||{}).task_description||'':'';
+  const now=new Date();
+  const ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  pendingComments.push({comment_id:`CMT-WEB-${Date.now()}`,comment_level:level,project_ref:projName,workstream_ref:wsName,task_ref:taskName,commented_by:REVIEWER_NAME,comment_type:type,comment_text:text,timestamp:ts,status:'Open'});
+  updatePendingCount();
+  document.getElementById('comment-form').style.display='none';document.getElementById('comment-footer').style.display='none';document.getElementById('comment-success').style.display='block';
+  setTimeout(()=>closeCommentModal(),1800);
 }
-
-function submitComment() {
-  const level  = document.getElementById('cm-level').value;
-  const type   = document.getElementById('cm-type').value;
-  const text   = document.getElementById('cm-text').value.trim();
-  const author = document.getElementById('cm-author').value.trim() || 'CEO';
-  const projId = document.getElementById('cm-project')?.value || '';
-  const wsId   = document.getElementById('cm-workstream')?.value || '';
-  const taskId = document.getElementById('cm-task')?.value || '';
-
-  if (!text) {
-    alert('Please enter a comment before saving.');
-    return;
-  }
-
-  const now = new Date();
-  const ts  = now.getFullYear() + '-'
-    + String(now.getMonth()+1).padStart(2,'0') + '-'
-    + String(now.getDate()).padStart(2,'0') + ' '
-    + String(now.getHours()).padStart(2,'0') + ':'
-    + String(now.getMinutes()).padStart(2,'0');
-
-  const comment = {
-    comment_id:    `CMT-WEB-${Date.now()}`,
-    comment_level: level,
-    project_id:    projId,
-    workstream_id: wsId,
-    task_id:       taskId,
-    commented_by:  author,
-    comment_type:  type,
-    comment_text:  text,
-    timestamp:     ts,
-    status:        'Open',
-    ap_response:   '',
-    ap_response_date: '',
-    resolved_date: ''
-  };
-
-  // Save to localStorage as a queue
-  // (publish.py reads ceo_comments.json; for OneDrive we save a downloadable file)
-  pendingComments.push(comment);
-  saveCommentsLocally();
-
-  // Show success
-  document.getElementById('comment-form').style.display   = 'none';
-  document.getElementById('comment-footer').style.display = 'none';
-  document.getElementById('comment-success').style.display = 'block';
-
-  setTimeout(() => closeCommentModal(), 2500);
+function updatePendingCount(){const c=pendingComments.length,el=document.getElementById('pending-count'),btn=document.getElementById('submit-all-btn');if(el)el.textContent=c;if(btn){btn.disabled=(c===0);btn.textContent=c===0?'↓ Submit All':`↓ Submit All (${c})`;}}
+function submitAllComments(){
+  if(pendingComments.length===0){alert('No pending comments.');return;}
+  const count=pendingComments.length;
+  if(EMAILJS_CONFIG.enabled&&window.emailjs){
+    const payload={to_email:EMAILJS_CONFIG.toEmail,reviewer:REVIEWER_NAME,count:count,submitted_at:new Date().toLocaleString(),comments_json:JSON.stringify(pendingComments,null,2),comments_readable:pendingComments.map((c,i)=>`${i+1}. [${c.comment_level}/${c.comment_type}] ${c.project_ref||'General'}${c.workstream_ref?' > '+c.workstream_ref:''}${c.task_ref?' > '+c.task_ref:''}\n   ${c.comment_text}`).join('\n\n')};
+    emailjs.send(EMAILJS_CONFIG.serviceId,EMAILJS_CONFIG.templateId,payload)
+      .then(()=>{markSubmitted(count);downloadComments();})
+      .catch(err=>{alert('Email failed ('+err.text+'). Downloading file instead — please send it to AP.');downloadComments();markSubmitted(count);});
+  }else{downloadComments();markSubmitted(count);}
 }
+function downloadComments(){const blob=new Blob([JSON.stringify(pendingComments,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ceo_comments.json';a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}
+function markSubmitted(count){pendingComments=[];updatePendingCount();const btn=document.getElementById('submit-all-btn');btn.textContent=`✓ ${count} submitted!`;btn.style.background='var(--green)';btn.style.color='#fff';setTimeout(()=>{btn.textContent='↓ Submit All';btn.style.background='';btn.style.color='';btn.disabled=true;},3000);}
 
-function saveCommentsLocally() {
-  // Save to sessionStorage so comments persist during the session
-  const existing = JSON.parse(sessionStorage.getItem('pending_comments') || '[]');
-  existing.push(...pendingComments.splice(0));
-  sessionStorage.setItem('pending_comments', JSON.stringify(existing));
+// GANTT
+function setGanttLevel(lvl,btn){GANTT_LEVEL=lvl;document.querySelectorAll('.filter-btn[data-glevel]').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderGantt();}
+function renderGantt(){
+  const root=document.getElementById('gantt-inner');if(!root||!DATA)return;
+  const items=[];
+  (DATA.projects||[]).forEach(p=>{
+    const pd=dateRange(p.date_initiated,p.target_completion);
+    items.push({level:'project',id:p.project_id,name:p.project_name,start:pd.start,end:pd.end,status:(p.overall_status||'').toLowerCase()});
+    if(GANTT_LEVEL==='project')return;
+    (DATA.workstreams||[]).filter(w=>w.project_id===p.project_id).forEach(w=>{
+      const wd=dateRange(w.start_date,w.target_completion);
+      items.push({level:'workstream',id:w.workstream_id,parent:p.project_id,name:w.workstream_name,start:wd.start,end:wd.end,status:(w.status||'').toLowerCase()});
+      if(GANTT_LEVEL==='workstream')return;
+      (DATA.tasks||[]).filter(t=>t.workstream_id===w.workstream_id).forEach(t=>{
+        const td=dateRange(t.due_date,t.due_date);
+        items.push({level:'task',id:t.task_id,parent:p.project_id,wsparent:w.workstream_id,name:t.task_description,start:td.start,end:td.end,status:(t.status||'').toLowerCase(),due:t.due_date});
+      });
+    });
+  });
+  const valid=items.filter(i=>i.start&&i.end);
+  if(valid.length===0){root.innerHTML='<div class="gantt-empty">No dated items to display. Add start/due dates in the PLANNER sheet.</div>';return;}
+  let minD=Math.min(...valid.map(i=>i.start.getTime())),maxD=Math.max(...valid.map(i=>i.end.getTime()));
+  minD=new Date(minD);minD=new Date(minD.getFullYear(),minD.getMonth(),1);
+  maxD=new Date(maxD);maxD=new Date(maxD.getFullYear(),maxD.getMonth()+1,0);
+  const months=[];let cur=new Date(minD);while(cur<=maxD){months.push(new Date(cur));cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
+  const totalMs=maxD.getTime()-minD.getTime();
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let html=`<div class="gantt-month-row"><div class="gantt-label-col">Project / Workstream / Task</div>`;
+  months.forEach(m=>{html+=`<div class="gantt-month">${monthNames[m.getMonth()]} '${String(m.getFullYear()).slice(2)}</div>`;});
+  html+=`</div>`;
+  const pos=(d)=>((d.getTime()-minD.getTime())/totalMs)*100;
+  items.forEach(it=>{
+    if(!it.start||!it.end)return;
+    const hidden=(it.level!=='project'&&it.parent&&ganttExpanded[it.parent]===false)?'gantt-hidden':'';
+    const left=pos(it.start),width=Math.max(pos(it.end)-left,1.5);
+    let barClass=`gantt-bar lvl-${it.level}`;
+    if(it.level==='workstream'){if(it.status==='green'||it.status==='completed')barClass+=' s-green';else if(it.status==='amber'||it.status.includes('progress'))barClass+=' s-amber';else if(it.status==='red')barClass+=' s-red';}
+    if(it.level==='task'){if(it.status==='done')barClass+=' s-done';else if(it.due&&isPastDate(it.due)&&it.status!=='done')barClass+=' s-overdue';else if(it.status.includes('progress'))barClass+=' s-inprog';}
+    const toggleIcon=it.level==='project'?(ganttExpanded[it.id]===false?'▸':'▾'):'';
+    const clickHandler=it.level==='project'?`onclick="toggleGantt('${jsId(it.id)}')"`:'';
+    html+=`<div class="gantt-track-row ${it.level==='project'?'proj-track':''} ${hidden}" data-gid="${cssId(it.id)}"><div class="gantt-row-label lvl-${it.level}" ${clickHandler}><span class="gantt-toggle-icon">${toggleIcon}</span>${escHtml(it.name||'')}</div><div class="gantt-bar-area"><div class="${barClass}" style="left:${left}%;width:${width}%" title="${escHtml(it.name)}: ${escHtml(fmtDate(it.start))} → ${escHtml(fmtDate(it.end))}">${it.level!=='task'?escHtml(it.name||''):''}</div></div></div>`;
+  });
+  // today line
+  const today=new Date();
+  if(today>=minD&&today<=maxD){const tl=pos(today);html+=`<div style="position:relative"><div class="gantt-today-line" style="left:calc(260px + (100% - 260px) * ${tl/100})"></div></div>`;}
+  root.innerHTML=html;
+}
+function toggleGantt(pid){ganttExpanded[pid]=(ganttExpanded[pid]===false)?true:false;renderGantt();}
 
-  // Trigger a JSON file download so the CEO can pass it to AP
-  // AP saves it as ceo_comments.json in the CF Dashboard folder
-  // and publish.py picks it up on next run
-  const all = JSON.parse(sessionStorage.getItem('pending_comments') || '[]');
-  const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = 'ceo_comments.json';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
+// AUTO-REFRESH (U) every 10 min
+setInterval(()=>loadData(true),600000);
 
-// ═══════════════════════════════════════════════════════════════════════════
-// UTILITY FUNCTIONS
-// ═══════════════════════════════════════════════════════════════════════════
-function ragStatusClass(status) {
-  switch(status) {
-    case 'green':     return 'rag-green project-row';
-    case 'amber':     return 'rag-amber project-row';
-    case 'red':       return 'rag-red project-row';
-    case 'on hold':   return 'rag-hold project-row';
-    case 'completed': return 'rag-completed project-row';
-    default:          return 'project-row';
-  }
-}
-function ragDotClass(status) {
-  switch(status) {
-    case 'green':     return 'green';
-    case 'amber':     return 'amber';
-    case 'red':       return 'red';
-    case 'on hold':   return 'hold';
-    case 'completed': return 'completed';
-    default:          return 'hold';
-  }
-}
-function ragTextColor(status) {
-  switch(status) {
-    case 'green':     return 'var(--green)';
-    case 'amber':     return 'var(--amber)';
-    case 'red':       return 'var(--red)';
-    case 'on hold':   return 'var(--hold)';
-    case 'completed': return 'var(--muted)';
-    default:          return 'var(--text-dim)';
-  }
-}
-function priorityClass(p) {
-  switch((p||'').toLowerCase()) {
-    case 'critical': return 'pill pill-priority-critical';
-    case 'high':     return 'pill pill-priority-high';
-    case 'medium':   return 'pill pill-priority-medium';
-    case 'low':      return 'pill pill-priority-low';
-    default:         return 'pill pill-priority-low';
-  }
-}
-function isPastDate(dateStr) {
-  if (!dateStr) return false;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) {
-    // Try DD-MMM-YYYY
-    const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      const day = parseInt(parts[0]);
-      const mon = months[parts[1]];
-      const yr  = parseInt(parts[2]);
-      if (!isNaN(day) && mon !== undefined && !isNaN(yr)) {
-        return new Date(yr, mon, day) < new Date();
-      }
-    }
-    return false;
-  }
-  return d < new Date();
-}
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
-}
+// UTILITIES
+function ragRowClass(s){return ({green:'rag-green',amber:'rag-amber',red:'rag-red','on hold':'rag-hold',completed:'rag-completed'}[s]||'');}
+function ragChip(s){const lbl=(s||'').replace(/\b\w/g,c=>c.toUpperCase());const cls=({green:'green',amber:'amber',red:'red','on hold':'hold',completed:'completed'}[s]||'hold');return `<span class="rag-chip ${cls}"><span class="dot"></span>${escHtml(lbl||'—')}</span>`;}
+function ragColor(s){return ({green:'var(--green)',amber:'var(--amber)',red:'var(--red)','on hold':'var(--hold)',completed:'var(--muted)'}[s]||'var(--text-dim)');}
+function prioClass(p){return ({critical:'pill pill-priority-critical',high:'pill pill-priority-high',medium:'pill pill-priority-medium',low:'pill pill-priority-low'}[(p||'').toLowerCase()]||'pill pill-priority-low');}
+function parseDate(s){if(!s)return null;let d=new Date(s);if(!isNaN(d.getTime())&&String(s).includes('-')&&String(s).length>10)return d;const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};const parts=String(s).split('-');if(parts.length===3){const day=parseInt(parts[0]),mon=months[parts[1]],yr=parseInt(parts[2]);if(!isNaN(day)&&mon!==undefined&&!isNaN(yr))return new Date(yr,mon,day);}d=new Date(s);return isNaN(d.getTime())?null:d;}
+function dateRange(s,e){return {start:parseDate(s),end:parseDate(e)||parseDate(s)};}
+function isPastDate(s){const d=parseDate(s);return d?d<new Date(new Date().toDateString()):false;}
+function fmtDate(d){if(!d)return '';const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${d.getDate()} ${mn[d.getMonth()]} ${d.getFullYear()}`;}
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function cssId(s){return String(s==null?'':s).replace(/[^a-zA-Z0-9_-]/g,'_');}
+function jsId(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
-// ═══════════════════════════════════════════════════════════════════════════
-// KEYBOARD SHORTCUTS
-// ═══════════════════════════════════════════════════════════════════════════
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closePinOverlay();
-    closeCommentModal();
-  }
-  // Ctrl+/ to focus search
-  if (e.ctrlKey && e.key === '/') {
-    document.getElementById('search-box').focus();
-    e.preventDefault();
-  }
-});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePinOverlay();closeCommentModal();}if(e.ctrlKey&&e.key==='/'){const sb=document.getElementById('search-box');if(sb)sb.focus();e.preventDefault();}});
+document.getElementById('pin-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('pin-overlay'))closePinOverlay();});
+document.getElementById('comment-modal').addEventListener('click',e=>{if(e.target===document.getElementById('comment-modal'))closeCommentModal();});
 
-// Click outside PIN box to close
-document.getElementById('pin-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('pin-overlay')) closePinOverlay();
-});
-
-// Click outside comment modal to close
-document.getElementById('comment-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('comment-modal')) closeCommentModal();
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════════════════
 loadData();
 </script>
 </body>
