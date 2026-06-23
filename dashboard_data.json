@@ -1,22 +1,22 @@
 {
   "meta": {
-    "published_at": "23 Jun 2026, 02:37 PM",
-    "published_at_iso": "2026-06-23T14:37:16.684727",
+    "published_at": "23 Jun 2026, 03:45 PM",
+    "published_at_iso": "2026-06-23T15:45:38.456073",
     "published_by": "AP",
     "company_name": "Fortune Bit Solutions Sdn Bhd",
     "department": "CEO's Office — Corporate Finance",
     "currency": "RM",
     "dashboard_version": "1.0",
-    "reviewer_pin": "1495"
+    "reviewer_pin": "1234"
   },
   "summary": {
-    "total_projects": 3,
+    "total_projects": 4,
     "active_projects": 2,
     "green": 1,
     "amber": 1,
     "red": 0,
     "on_hold": 0,
-    "completed": 1,
+    "completed": 2,
     "total_deal_value_rm": 45000000,
     "overdue_tasks": 5,
     "open_comments": 1
@@ -84,6 +84,27 @@
       "next_action_due": "",
       "brief_description": "Institutional-grade sell-side equity research; NEUTRAL/HOLD at RM6.30 TP vs RM7.81 market",
       "notes": "Contrarian call — circulate with caveat"
+    },
+    {
+      "project_id": "PROJ-004",
+      "project_name": "Test Project - CEO Dashboard Demo",
+      "project_type": "Analysis",
+      "type_—_if_other,_specify_here": "",
+      "priority": "High",
+      "overall_status": "Completed",
+      "stage": "Execution",
+      "deal_value_rm": 5000000,
+      "project_lead": "AP",
+      "date_initiated": "23-Jun-2026",
+      "target_completion": "25-Jun-2026",
+      "actual_completion": "23-Jun-2026",
+      "external_advisors": "",
+      "confidentiality_level": "Internal",
+      "key_risk": "Dashboard error",
+      "next_action": "Test link with Jas and Shalini",
+      "next_action_due": "23-Jun-2026",
+      "brief_description": "Project Update Dashboard for CEO",
+      "notes": "Get feedback"
     }
   ],
   "counterparties": [
