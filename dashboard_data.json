@@ -1,9 +1,9 @@
 {
   "meta": {
-    "published_at": "23 Jun 2026, 11:41 PM",
-    "published_at_iso": "2026-06-23T23:41:25.992337",
+    "published_at": "24 Jun 2026, 10:51 AM",
+    "published_at_iso": "2026-06-24T10:51:53.742512",
     "published_by": "AP",
-    "company_name": "Fortune Bit Solutions Sdn Bhd",
+    "company_name": "Lagenda Properties Bhd",
     "department": "CEO's Office — Corporate Finance",
     "currency": "RM",
     "dashboard_version": "2.0",
@@ -341,38 +341,5 @@
     }
   ],
   "ceo_comments": [],
-  "changes": [
-    {
-      "type": "action",
-      "text": "PR1MA Sitiawan En-Bloc Acquisition: next action updated → Submit revised LOI to PR1MA"
-    },
-    {
-      "type": "new",
-      "text": "New project added: Puncak Warisan Settlement"
-    },
-    {
-      "type": "new",
-      "text": "New project added: Press Metal (PMETAL) Equity Research"
-    },
-    {
-      "type": "new",
-      "text": "New project added: Unsecured Lending - Heda Capital"
-    },
-    {
-      "type": "new",
-      "text": "New project added: VC/PE - Heda Capital"
-    },
-    {
-      "type": "new",
-      "text": "New project added: Oasis Harves (De Wan)"
-    },
-    {
-      "type": "overdue",
-      "text": "Task now overdue: Conduct title search on all 333 units"
-    },
-    {
-      "type": "overdue",
-      "text": "Task now overdue: Draft revised LOI capped at RM45M"
-    }
-  ]
+  "changes": []
 }
