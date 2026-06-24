@@ -1,7 +1,7 @@
 {
   "meta": {
-    "published_at": "24 Jun 2026, 05:02 PM",
-    "published_at_iso": "2026-06-24T17:02:45.139500",
+    "published_at": "24 Jun 2026, 05:04 PM",
+    "published_at_iso": "2026-06-24T17:04:37.942803",
     "published_by": "AP",
     "company_name": "Lagenda Properties Bhd",
     "department": "CEO's Office",
@@ -20,7 +20,7 @@
     "completed": 1,
     "total_deal_value_rm": 45000000,
     "overdue_tasks": 2,
-    "open_comments": 0
+    "open_comments": 1
   },
   "projects": [
     {
@@ -340,6 +340,27 @@
       "notes": ""
     }
   ],
-  "ceo_comments": [],
-  "changes": []
+  "ceo_comments": [
+    {
+      "comment_id": "CMT-WEB-1782291864287",
+      "comment_level": "Project",
+      "project_ref": "PR1MA Sitiawan En-Bloc Acquisition",
+      "workstream_ref": "Legal Due Diligence",
+      "task_ref": "Conduct title search on all 333 units",
+      "commented_by": "CEO",
+      "comment_type": "Direction",
+      "comment_text": "Fas",
+      "timestamp": "2026-06-24 17:04",
+      "status": "Open",
+      "ap_response": "",
+      "ap_response_date": "",
+      "resolved_date": ""
+    }
+  ],
+  "changes": [
+    {
+      "type": "comment",
+      "text": "1 new comment from CEO"
+    }
+  ]
 }
