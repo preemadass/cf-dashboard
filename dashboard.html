@@ -254,7 +254,13 @@ a{color:var(--gold);text-decoration:none}
 #comment-cancel{padding:10px 18px;background:var(--surface2);color:var(--muted);font-size:0.82rem;border-radius:var(--radius-sm);border:1px solid var(--border2)}
 #comment-success{text-align:center;padding:16px 0;display:none}
 #comment-success .tick{font-size:2.5rem;color:var(--green)}
-#comment-success p{margin-top:8px;font-size:0.82rem;color:var(--text-dim)}
+#comment-success p{margin-top:8px;font-size:0.85rem;color:var(--text-dim)}
+.success-actions{display:flex;flex-direction:column;gap:9px;margin:20px auto 0;max-width:340px}
+.success-actions button{padding:13px;border-radius:10px;font-size:0.9rem;font-weight:600;min-height:48px;cursor:pointer}
+.sa-primary{background:var(--gold);color:var(--navy);font-weight:700}
+.sa-primary:hover{background:var(--gold-light)}
+.sa-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.sa-secondary:hover{border-color:var(--gold)}
 #fab{display:none;position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--navy);font-weight:700;font-size:0.8rem;padding:13px 22px;border-radius:30px;box-shadow:0 4px 20px rgba(201,162,39,0.4);transition:var(--transition);z-index:90}
 #fab:hover{transform:translateY(-2px)}
 #fab.reviewer-visible{display:block}
@@ -280,10 +286,24 @@ a{color:var(--gold);text-decoration:none}
 .chg-status::before{content:'⇄'!important;color:var(--amber)!important}
 .chg-overdue::before{content:'!'!important;color:var(--red)!important}
 .chg-new::before{content:'+'!important;color:var(--green)!important}
+.chg-comment::before{content:'✎'!important;color:var(--gold)!important}
+.chg-action::before{content:'›'!important;color:var(--hold)!important}
 #footer strong{color:var(--muted)}
-@media print{#topbar,#toolbar,#fab,#update-banner,.ceo-comment-btn,.task-comment-btn,#pending-wrap,#mode-btn,.view-toggle,.icon-btn,#search-wrap{display:none!important}body{background:#fff;color:#000}.project-drawer{display:block!important}.kpi-card,.project-row,.ws-card{break-inside:avoid}#main{max-width:100%;padding:0}:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--text:#000;--offwhite:#000;--text-dim:#444;--border:#ccc;--border2:#999}}
+/* Consolidated reviewer-comments panel */
+#comments-overview{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:var(--radius);padding:16px 18px;margin-bottom:22px}
+.co-header{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.co-title{font-size:0.95rem;font-weight:700;color:var(--offwhite);display:flex;align-items:center;gap:9px}
+.co-count-badge{background:var(--gold);color:#1c1403;font-size:0.72rem;font-weight:800;padding:2px 9px;border-radius:20px;min-width:22px;text-align:center;line-height:1.5}
+.co-meta{font-size:0.7rem;color:var(--text-dim)}
+.co-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.co-toggle{margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--text-dim);font-size:0.66rem;padding:6px 13px;border-radius:20px;cursor:pointer;font-weight:600;white-space:nowrap}
+.co-toggle:hover{color:var(--text);border-color:var(--border2)}
+.co-body{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.comment-context{font-size:0.64rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:7px}
+.comment-context .co-sep{color:var(--text-dim);margin:0 5px;font-weight:400}
+@media print{#topbar,#toolbar,#fab,#update-banner,.ceo-comment-btn,.task-comment-btn,#pending-wrap,#mode-btn,.view-toggle,.icon-btn,#search-wrap,.co-toggle{display:none!important}body{background:#fff;color:#000}.project-drawer{display:block!important}.kpi-card,.project-row,.ws-card{break-inside:avoid}#main{max-width:100%;padding:0}:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--text:#000;--offwhite:#000;--text-dim:#444;--border:#ccc;--border2:#999}}
 @media (max-width:1100px){#kpi-grid,.sk-kpi-grid{grid-template-columns:repeat(4,1fr)}.table-head .th:nth-child(6),.table-head .th:nth-child(8),.project-row .td:nth-child(6),.project-row .td:nth-child(8){display:none}.table-head,.project-row{grid-template-columns:120px 2fr 1fr 0.9fr 1fr 40px}}
-@media (max-width:768px){#topbar{padding:10px 14px;gap:8px}#topbar-logo{font-size:1rem}.topbar-sub{display:none}#topbar-right{gap:6px;width:100%;justify-content:flex-start}.icon-btn,#mode-btn,#submit-all-btn{font-size:0.62rem;padding:5px 10px}#published-badge{font-size:0.58rem;padding:4px 8px}#pending-badge{font-size:0.58rem;padding:3px 7px}.view-toggle button{font-size:0.62rem;padding:5px 10px}#main{padding:14px 10px 90px}#kpi-grid,.sk-kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px}.kpi-value{font-size:1.4rem}.kpi-value.big{font-size:1.05rem}#toolbar{gap:5px}.filter-btn{font-size:0.65rem;padding:5px 10px}#search-wrap{width:100%;margin-left:0;margin-top:4px}#search-box{width:100%}.sort-select{width:100%;margin-top:4px}.table-head{display:none}.project-row{display:block;padding:13px 40px 13px 16px;border-left-width:4px;position:relative}.project-row .td{display:block;padding:0;font-size:0.8rem}.project-row .td:nth-child(1){margin-bottom:7px}.project-row .td:nth-child(2){margin-bottom:7px}.project-row .td:nth-child(6),.project-row .td:nth-child(8){display:block}.proj-name{font-size:0.86rem;word-break:break-word}.proj-desc{white-space:normal;max-width:100%;word-break:break-word}.project-row .td:nth-child(3),.project-row .td:nth-child(4),.project-row .td:nth-child(5),.project-row .td:nth-child(6){margin-bottom:5px}.project-row .td:nth-child(3){display:flex;flex-wrap:wrap;gap:4px}.project-row .td:nth-child(7){border-top:1px solid var(--border);padding-top:7px;margin-top:4px;word-break:break-word}.project-row .td:nth-child(8){font-size:0.7rem;color:var(--text-dim);word-break:break-word}.project-row .td:nth-child(9){position:absolute;top:12px;right:12px;padding:0}.project-drawer{padding:14px 12px 18px 14px}.drawer-header{flex-direction:column;gap:10px}.ceo-comment-btn{width:100%;justify-content:center}.ws-name{width:100%}.task-item{display:flex;flex-direction:column;gap:4px;padding:8px 0 8px 22px;position:relative;align-items:flex-start}.task-item .task-check{position:absolute;left:0;top:9px}.task-item .task-desc{font-size:0.74rem;word-break:break-word;width:100%}#comment-modal{align-items:flex-end}#comment-box{width:100%;max-width:100%;border-radius:14px 14px 0 0;padding:20px 16px}.form-row-2col{grid-template-columns:1fr;gap:0}#pin-overlay{align-items:flex-end}#pin-box{width:100%;border-radius:14px 14px 0 0}#fab{bottom:14px;right:14px;padding:11px 16px;font-size:0.72rem}.gantt-label-col,.gantt-row-label{width:150px}.gantt-inner{min-width:560px}}
+@media (max-width:768px){#topbar{padding:10px 14px;gap:8px}#topbar-logo{font-size:1rem}.topbar-sub{display:none}#topbar-right{gap:6px;width:100%;justify-content:flex-start}.icon-btn,#mode-btn,#submit-all-btn{font-size:0.62rem;padding:5px 10px}#published-badge{font-size:0.58rem;padding:4px 8px}#pending-badge{font-size:0.58rem;padding:3px 7px}.view-toggle button{font-size:0.62rem;padding:5px 10px}#main{padding:14px 10px 90px}#kpi-grid,.sk-kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px}.kpi-value{font-size:1.4rem}.kpi-value.big{font-size:1.05rem}#toolbar{gap:5px}.filter-btn{font-size:0.65rem;padding:5px 10px}#search-wrap{width:100%;margin-left:0;margin-top:4px}#search-box{width:100%}.sort-select{width:100%;margin-top:4px}.table-head{display:none}.project-row{display:block;padding:13px 40px 13px 16px;border-left-width:4px;position:relative}.project-row .td{display:block;padding:0;font-size:0.8rem}.project-row .td:nth-child(1){margin-bottom:7px}.project-row .td:nth-child(2){margin-bottom:7px}.project-row .td:nth-child(6),.project-row .td:nth-child(8){display:block}.proj-name{font-size:0.86rem;word-break:break-word}.proj-desc{white-space:normal;max-width:100%;word-break:break-word}.project-row .td:nth-child(3),.project-row .td:nth-child(4),.project-row .td:nth-child(5),.project-row .td:nth-child(6){margin-bottom:5px}.project-row .td:nth-child(3){display:flex;flex-wrap:wrap;gap:4px}.project-row .td:nth-child(7){border-top:1px solid var(--border);padding-top:7px;margin-top:4px;word-break:break-word}.project-row .td:nth-child(8){font-size:0.7rem;color:var(--text-dim);word-break:break-word}.project-row .td:nth-child(9){position:absolute;top:12px;right:12px;padding:0}.project-drawer{padding:14px 12px 18px 14px}.drawer-header{flex-direction:column;gap:10px}.ceo-comment-btn{width:100%;justify-content:center}.ws-name{width:100%}.task-item{display:flex;flex-direction:column;gap:4px;padding:8px 0 8px 22px;position:relative;align-items:flex-start}.task-item .task-check{position:absolute;left:0;top:9px}.task-item .task-desc{font-size:0.74rem;word-break:break-word;width:100%}#comment-modal{align-items:stretch}#comment-box{width:100%;max-width:100%;height:100%;max-height:none;border-radius:0;padding:0;display:flex;flex-direction:column}#comment-box>h3{padding:16px 16px 2px}#comment-box>.modal-sub{padding:0 16px 8px}#comment-form{flex:1;overflow-y:auto;padding:6px 16px 14px}#comment-success{padding:30px 18px}.form-select,.form-input,.form-textarea{font-size:16px;padding:12px 14px}.form-textarea{min-height:120px}.form-label{font-size:0.74rem}.modal-footer{flex-shrink:0;margin-top:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--surface);flex-direction:column-reverse;gap:8px}.modal-footer button{width:100%;min-height:48px;border-radius:10px}#comment-cancel,#comment-submit{font-size:0.92rem}.form-row-2col{grid-template-columns:1fr;gap:0}#pin-overlay{align-items:flex-end}#pin-box{width:100%;border-radius:14px 14px 0 0}#fab{bottom:14px;right:14px;padding:11px 16px;font-size:0.72rem}.gantt-label-col,.gantt-row-label{width:150px}.gantt-inner{min-width:560px}#comments-overview{padding:13px 14px}.co-title{font-size:0.86rem}.co-toggle{margin-left:0;margin-top:2px}.co-meta{width:100%}.comment-card{font-size:0.76rem}}
 @media (max-width:480px){#kpi-grid,.sk-kpi-grid{gap:6px}.kpi-card{padding:11px}.kpi-value{font-size:1.2rem}#topbar-logo{font-size:0.9rem}}
 </style>
 </head>
@@ -324,8 +344,8 @@ a{color:var(--gold);text-decoration:none}
 
 <div id="comment-modal">
   <div id="comment-box">
-    <h3>Add Comment / Direction</h3>
-    <p class="modal-sub">Added to your pending queue. Submit all at once when done.</p>
+    <h3>Add a comment</h3>
+    <p class="modal-sub">Add as many as you like — they're collected together, then sent to AP in one tap.</p>
     <div id="comment-form">
       <div class="form-row-2col">
         <div class="form-row"><label class="form-label">Level</label>
@@ -349,10 +369,14 @@ a{color:var(--gold);text-decoration:none}
         <textarea class="form-textarea" id="cm-text" placeholder="Type your comment..."></textarea></div>
     </div>
     <div id="comment-success"><div class="tick">✓</div>
-      <p>Added to your pending queue.<br>Click <strong style="color:var(--gold)">Submit All</strong> in the top bar when done.</p></div>
+      <p id="comment-success-msg">Comment added.</p>
+      <div class="success-actions">
+        <button class="sa-primary" id="success-submit-btn" onclick="submitFromModal()">Send to AP now</button>
+        <button class="sa-secondary" onclick="addAnotherComment()">Add another comment</button>
+      </div></div>
     <div class="modal-footer" id="comment-footer">
       <button id="comment-cancel" onclick="closeCommentModal()">Cancel</button>
-      <button id="comment-submit" onclick="submitComment()">Add to Queue</button>
+      <button id="comment-submit" onclick="submitComment()">Add comment</button>
     </div>
   </div>
 </div>
@@ -369,6 +393,14 @@ a{color:var(--gold);text-decoration:none}
   <div id="dashboard-content" style="display:none">
     <div id="dashboard-view">
       <div id="changes-panel" style="display:none"></div>
+      <div id="comments-overview" style="display:none">
+        <div class="co-header">
+          <div class="co-title">📌 Reviewer Comments <span class="co-count-badge" id="co-count">0</span></div>
+          <div class="co-meta" id="co-summary"></div>
+          <button class="co-toggle" id="co-toggle" onclick="toggleCommentsOverview()">Hide</button>
+        </div>
+        <div class="co-body" id="co-body"></div>
+      </div>
       <div class="section-label">Portfolio Overview</div>
       <div id="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">Total Projects</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub" id="kpi-active-sub">— active</div></div>
@@ -486,6 +518,7 @@ function renderDashboard(){
   document.getElementById('footer-pub').textContent=`Last published by ${m.published_by||'AP'} on ${m.published_at||'—'}`;
   updateFilterCounts();
   renderChanges();
+  renderCommentsOverview();
   renderKPIs();
   populateCommentProjects();
   renderProjects();
@@ -519,6 +552,45 @@ function renderChanges(){
   if(!changes.length){panel.style.display='none';return;}
   const typeClass={status:'chg-status',overdue:'chg-overdue',new:'chg-new'};
   panel.innerHTML=`<div class="cp-title">↻ Changes since last publish <span class="cp-close" onclick="document.getElementById('changes-panel').style.display='none'">✕ dismiss</span></div><ul>${changes.map(c=>`<li class="${typeClass[c.type]||''}">${escHtml(c.text)}</li>`).join('')}</ul>`;
+  panel.style.display='block';
+}
+
+// CONSOLIDATED REVIEWER COMMENTS (top-level visibility)
+let coCollapsed=false;
+function toggleCommentsOverview(){
+  coCollapsed=!coCollapsed;
+  document.getElementById('co-body').style.display=coCollapsed?'none':'flex';
+  document.getElementById('co-toggle').textContent=coCollapsed?'Show':'Hide';
+}
+function renderCommentsOverview(){
+  const panel=document.getElementById('comments-overview');
+  const all=(DATA&&DATA.ceo_comments)||[];
+  if(!all.length){panel.style.display='none';return;}
+  const rank={open:0,acknowledged:1,resolved:2};
+  const sorted=all.slice().sort((a,b)=>{
+    const ra=rank[(a.status||'open').toLowerCase()]??0, rb=rank[(b.status||'open').toLowerCase()]??0;
+    if(ra!==rb)return ra-rb;
+    return String(b.timestamp||'').localeCompare(String(a.timestamp||''));
+  });
+  const n=s=>all.filter(c=>(c.status||'open').toLowerCase()===s).length;
+  const openN=n('open'),ackN=n('acknowledged'),resN=n('resolved');
+  document.getElementById('co-count').textContent=all.length;
+  const parts=[];
+  if(openN)parts.push(`<span class="co-dot" style="background:var(--red)"></span>${openN} open`);
+  if(ackN)parts.push(`<span class="co-dot" style="background:var(--amber)"></span>${ackN} acknowledged`);
+  if(resN)parts.push(`<span class="co-dot" style="background:var(--green)"></span>${resN} resolved`);
+  document.getElementById('co-summary').innerHTML=parts.join('&nbsp;&nbsp;');
+  document.getElementById('co-body').innerHTML=sorted.map(c=>{
+    const st=(c.status||'').toLowerCase();
+    const cc=st==='resolved'?'resolved-comment':st==='acknowledged'?'ack-comment':'open-comment';
+    const tv=(c.comment_type||'').toLowerCase();
+    const tc=tv==='direction'?'direction':tv==='approval'?'approval':tv==='query'?'query':'';
+    const crumbs=[c.project_ref,c.workstream_ref,c.task_ref].filter(Boolean).map(escHtml);
+    const ctx=crumbs.length?`<div class="comment-context">${crumbs.join('<span class="co-sep">›</span>')}</div>`:`<div class="comment-context">General</div>`;
+    return `<div class="comment-card ${cc}">${ctx}<div class="comment-top"><span class="comment-by">${escHtml(c.commented_by||'CEO')}</span><span class="comment-ts">${escHtml(c.timestamp||'')}</span><span class="comment-type-badge ${tc}">${escHtml(c.comment_type||'')}</span><span class="comment-status-badge" style="color:${st==='resolved'?'var(--green)':st==='acknowledged'?'var(--amber)':'var(--red)'}">${escHtml((c.status||'OPEN').toUpperCase())}</span></div><div class="comment-body">${escHtml(c.comment_text||'')}</div>${c.ap_response?`<div class="comment-response"><div class="comment-response-label">AP's Response</div><div class="comment-response-text">${escHtml(c.ap_response)}</div></div>`:''}</div>`;
+  }).join('');
+  document.getElementById('co-body').style.display=coCollapsed?'none':'flex';
+  document.getElementById('co-toggle').textContent=coCollapsed?'Show':'Hide';
   panel.style.display='block';
 }
 
@@ -742,9 +814,26 @@ function openCommentModal(level,pid,wid,tid){
   if(wid){populateCommentWorkstreams();document.getElementById('cm-workstream').value=wid;}
   if(tid){populateCommentTasks();document.getElementById('cm-task').value=tid;}
   document.getElementById('comment-modal').classList.add('show');
-  setTimeout(()=>document.getElementById('cm-text').focus(),100);
+  fitCommentSheet();
+  if(!window.matchMedia('(pointer:coarse)').matches)setTimeout(()=>document.getElementById('cm-text').focus(),100);
 }
-function closeCommentModal(){document.getElementById('comment-modal').classList.remove('show');}
+function closeCommentModal(){document.getElementById('comment-modal').classList.remove('show');const b=document.getElementById('comment-box');if(b)b.style.height='';}
+// Keep the sheet (and its footer/buttons) above the on-screen keyboard on phones.
+function fitCommentSheet(){
+  const box=document.getElementById('comment-box');if(!box)return;
+  if(window.innerWidth<=768&&window.visualViewport){box.style.height=window.visualViewport.height+'px';}
+  else{box.style.height='';}
+}
+if(window.visualViewport){window.visualViewport.addEventListener('resize',()=>{if(document.getElementById('comment-modal').classList.contains('show'))fitCommentSheet();});}
+function addAnotherComment(){
+  document.getElementById('comment-success').style.display='none';
+  document.getElementById('comment-form').style.display='block';
+  document.getElementById('comment-footer').style.display='flex';
+  document.getElementById('cm-text').value='';
+  document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));
+  if(!window.matchMedia('(pointer:coarse)').matches)setTimeout(()=>document.getElementById('cm-text').focus(),60);
+}
+function submitFromModal(){closeCommentModal();submitAllComments();}
 function submitComment(){
   const level=document.getElementById('cm-level').value,type=document.getElementById('cm-type').value,text=document.getElementById('cm-text').value.trim();
   const projSel=document.getElementById('cm-project'),wsSel=document.getElementById('cm-workstream'),taskSel=document.getElementById('cm-task');
@@ -764,7 +853,9 @@ function submitComment(){
   pendingComments.push({comment_id:`CMT-WEB-${Date.now()}`,comment_level:level,project_ref:projName,workstream_ref:wsName,task_ref:taskName,commented_by:REVIEWER_NAME,comment_type:type,comment_text:text,timestamp:ts,status:'Open'});
   updatePendingCount();
   document.getElementById('comment-form').style.display='none';document.getElementById('comment-footer').style.display='none';document.getElementById('comment-success').style.display='block';
-  setTimeout(()=>closeCommentModal(),1800);
+  const cnt=pendingComments.length;
+  const msg=document.getElementById('comment-success-msg');if(msg)msg.textContent=cnt>1?`Comment added — ${cnt} ready to send.`:'Comment added.';
+  const sb=document.getElementById('success-submit-btn');if(sb)sb.textContent=cnt>1?`Send ${cnt} comments to AP now`:'Send to AP now';
 }
 function updatePendingCount(){const c=pendingComments.length,el=document.getElementById('pending-count'),btn=document.getElementById('submit-all-btn');if(el)el.textContent=c;if(btn){btn.disabled=(c===0);btn.textContent=c===0?'↓ Submit All':`↓ Submit All (${c})`;}}
 function submitAllComments(){
