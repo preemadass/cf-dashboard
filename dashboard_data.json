@@ -1,7 +1,7 @@
 {
   "meta": {
-    "published_at": "24 Jun 2026, 05:04 PM",
-    "published_at_iso": "2026-06-24T17:04:37.942803",
+    "published_at": "24 Jun 2026, 06:39 PM",
+    "published_at_iso": "2026-06-24T18:39:23.316669",
     "published_by": "AP",
     "company_name": "Lagenda Properties Bhd",
     "department": "CEO's Office",
@@ -14,44 +14,33 @@
     "total_projects": 6,
     "active_projects": 5,
     "green": 1,
-    "amber": 1,
+    "amber": 0,
     "red": 0,
     "on_hold": 0,
     "completed": 1,
-    "total_deal_value_rm": 45000000,
-    "overdue_tasks": 2,
+    "total_deal_value_rm": 0,
+    "overdue_tasks": 3,
     "open_comments": 1
   },
   "projects": [
     {
       "project_id": "PROJ-001",
-      "project_name": "PR1MA Sitiawan En-Bloc Acquisition",
-      "project_type": "M&A",
+      "project_name": "Heda Capital",
+      "project_type": "Joint Venture",
       "project_lead": "AP",
-      "priority": "Critical",
-      "overall_status": "Amber",
+      "priority": "High",
+      "overall_status": "In Progress",
       "stage": "Negotiation",
       "date_initiated": "01-Apr-2025",
       "target_completion": "31-Aug-2025",
-      "deal_value_rm": 45000000,
-      "brief_description": "333-unit en-bloc purchase in settlement of GME dispute",
-      "counterparties": [
-        {
-          "counterparty_name": "PR1MA Corporation",
-          "counterparty_role": "Vendor",
-          "pic_name": ""
-        },
-        {
-          "counterparty_name": "Ministry of Housing KPKT",
-          "counterparty_role": "Regulator",
-          "pic_name": ""
-        }
-      ],
-      "key_risk": "MEBPA interpretation dispute with PR1MA",
-      "confidentiality_level": "Restricted",
-      "external_advisors": "Messrs. Zaid Ibrahim & Co.",
-      "next_action": "Submit revised LOI to PR1MA",
-      "next_action_due": "30-Jun-2025"
+      "deal_value_rm": 0,
+      "brief_description": "Pending direction from DJM",
+      "counterparties": [],
+      "key_risk": "",
+      "confidentiality_level": "",
+      "external_advisors": "",
+      "next_action": "",
+      "next_action_due": ""
     },
     {
       "project_id": "PROJ-002",
@@ -163,18 +152,6 @@
   ],
   "counterparties": [
     {
-      "counterparty_name": "PR1MA Corporation",
-      "counterparty_role": "Vendor",
-      "pic_name": "",
-      "project_id": "PROJ-001"
-    },
-    {
-      "counterparty_name": "Ministry of Housing KPKT",
-      "counterparty_role": "Regulator",
-      "pic_name": "",
-      "project_id": "PROJ-001"
-    },
-    {
       "counterparty_name": "Puncak Warisan Purchasers Committee",
       "counterparty_role": "Claimant",
       "pic_name": "",
@@ -191,10 +168,10 @@
     {
       "workstream_id": "WS-001",
       "project_id": "PROJ-001",
-      "workstream_name": "Legal Due Diligence",
-      "workstream_type": "Legal",
-      "owner": "AP / Zaid Ibrahim",
-      "status": "Amber",
+      "workstream_name": "Unsecured Lending",
+      "workstream_type": "Financial",
+      "owner": "AP",
+      "status": "In Progress",
       "completion_pct": "60",
       "start_date": "05-Apr-2025",
       "target_completion": "30-Jun-2025",
@@ -204,11 +181,11 @@
     {
       "workstream_id": "WS-002",
       "project_id": "PROJ-001",
-      "workstream_name": "MEBPA Structuring",
+      "workstream_name": "VC/PE Business",
       "workstream_type": "Financial",
       "owner": "AP",
       "status": "Amber",
-      "completion_pct": "75",
+      "completion_pct": 10,
       "start_date": "01-Apr-2025",
       "target_completion": "15-Jun-2025",
       "key_deliverable": "",
@@ -259,10 +236,10 @@
       "task_id": "TASK-001",
       "workstream_id": "WS-001",
       "project_id": "PROJ-001",
-      "task_description": "Conduct title search on all 333 units",
-      "assignee": "Zaid Ibrahim",
+      "task_description": "Product Analysis",
+      "assignee": "AP",
       "priority": "High",
-      "status": "In Progress",
+      "status": "Completed",
       "due_date": "20-Jun-2025",
       "completed_date": "",
       "notes": "Coordinate with surveyor"
@@ -271,28 +248,40 @@
       "task_id": "TASK-002",
       "workstream_id": "WS-001",
       "project_id": "PROJ-001",
-      "task_description": "Review MEBPA red-flag clauses",
+      "task_description": "Transaction Structure",
       "assignee": "AP",
       "priority": "High",
-      "status": "Done",
+      "status": "Completed",
       "due_date": "30-May-2025",
       "completed_date": "",
       "notes": "Memo shared with CEO"
     },
     {
       "task_id": "TASK-003",
-      "workstream_id": "WS-002",
+      "workstream_id": "WS-001",
       "project_id": "PROJ-001",
-      "task_description": "Draft revised LOI capped at RM45M",
+      "task_description": "Presentation to CEO & DJM",
       "assignee": "AP",
       "priority": "Critical",
+      "status": "To Do",
+      "due_date": "",
+      "completed_date": "",
+      "notes": ""
+    },
+    {
+      "task_id": "TASK-004",
+      "workstream_id": "WS-002",
+      "project_id": "PROJ-001",
+      "task_description": "Transaction Structure",
+      "assignee": "AP",
+      "priority": "High",
       "status": "In Progress",
       "due_date": "30-Jun-2025",
       "completed_date": "",
       "notes": "v3 in progress"
     },
     {
-      "task_id": "TASK-004",
+      "task_id": "TASK-005",
       "workstream_id": "WS-003",
       "project_id": "PROJ-002",
       "task_description": "Finalise media holding statement",
@@ -304,7 +293,7 @@
       "notes": "Approved by CEO"
     },
     {
-      "task_id": "TASK-005",
+      "task_id": "TASK-006",
       "workstream_id": "WS-004",
       "project_id": "PROJ-003",
       "task_description": "Build 3-statement model FY25-27",
@@ -316,7 +305,7 @@
       "notes": "Bloomberg data"
     },
     {
-      "task_id": "TASK-006",
+      "task_id": "TASK-007",
       "workstream_id": "WS-005",
       "project_id": "PROJ-006",
       "task_description": "Share IRL with Counterparty",
@@ -328,7 +317,7 @@
       "notes": ""
     },
     {
-      "task_id": "TASK-007",
+      "task_id": "TASK-008",
       "workstream_id": "WS-005",
       "project_id": "PROJ-006",
       "task_description": "Execution of NDA",
@@ -359,8 +348,20 @@
   ],
   "changes": [
     {
-      "type": "comment",
-      "text": "1 new comment from CEO"
+      "type": "new",
+      "text": "New project added: Heda Capital"
+    },
+    {
+      "type": "overdue",
+      "text": "Task now overdue: Product Analysis"
+    },
+    {
+      "type": "overdue",
+      "text": "Task now overdue: Transaction Structure"
+    },
+    {
+      "type": "overdue",
+      "text": "Task now overdue: Transaction Structure"
     }
   ]
 }
