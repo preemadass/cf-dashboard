@@ -1,7 +1,7 @@
 {
   "meta": {
-    "published_at": "24 Jun 2026, 04:32 PM",
-    "published_at_iso": "2026-06-24T16:32:16.022142",
+    "published_at": "24 Jun 2026, 04:52 PM",
+    "published_at_iso": "2026-06-24T16:52:22.260574",
     "published_by": "AP",
     "company_name": "Lagenda Properties Bhd",
     "department": "CEO's Office — Corporate Finance",
@@ -20,7 +20,7 @@
     "completed": 1,
     "total_deal_value_rm": 45000000,
     "overdue_tasks": 2,
-    "open_comments": 2
+    "open_comments": 1
   },
   "projects": [
     {
@@ -352,8 +352,8 @@
       "comment_text": "hello test test",
       "timestamp": "2026-06-24 16:12",
       "status": "Open",
-      "ap_response": "",
-      "ap_response_date": "",
+      "ap_response": "Settled",
+      "ap_response_date": "24-Jun-2026",
       "resolved_date": ""
     },
     {
@@ -366,11 +366,16 @@
       "comment_type": "Direction",
       "comment_text": "test test settle this faster pls",
       "timestamp": "2026-06-24 16:12",
-      "status": "Open",
-      "ap_response": "",
-      "ap_response_date": "",
+      "status": "Acknowledged",
+      "ap_response": "Settled",
+      "ap_response_date": "24-Jun-2026",
       "resolved_date": ""
     }
   ],
-  "changes": []
+  "changes": [
+    {
+      "type": "comment",
+      "text": "Direction acknowledged: test test settle this faster pls"
+    }
+  ]
 }
