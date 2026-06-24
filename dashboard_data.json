@@ -1,7 +1,7 @@
 {
   "meta": {
-    "published_at": "24 Jun 2026, 04:10 PM",
-    "published_at_iso": "2026-06-24T16:10:33.811409",
+    "published_at": "24 Jun 2026, 04:12 PM",
+    "published_at_iso": "2026-06-24T16:12:52.009490",
     "published_by": "AP",
     "company_name": "Lagenda Properties Bhd",
     "department": "CEO's Office — Corporate Finance",
@@ -20,7 +20,7 @@
     "completed": 1,
     "total_deal_value_rm": 45000000,
     "overdue_tasks": 2,
-    "open_comments": 0
+    "open_comments": 2
   },
   "projects": [
     {
@@ -340,6 +340,37 @@
       "notes": ""
     }
   ],
-  "ceo_comments": [],
+  "ceo_comments": [
+    {
+      "comment_id": "CMT-WEB-1782288728945",
+      "comment_level": "General",
+      "project_ref": "",
+      "workstream_ref": "",
+      "task_ref": "",
+      "commented_by": "Jas Test",
+      "comment_type": "Direction",
+      "comment_text": "hello test test",
+      "timestamp": "2026-06-24 16:12",
+      "status": "Open",
+      "ap_response": "",
+      "ap_response_date": "",
+      "resolved_date": ""
+    },
+    {
+      "comment_id": "CMT-WEB-1782288741071",
+      "comment_level": "Project",
+      "project_ref": "Puncak Warisan Settlement",
+      "workstream_ref": "",
+      "task_ref": "",
+      "commented_by": "Jas Test",
+      "comment_type": "Direction",
+      "comment_text": "test test settle this faster pls",
+      "timestamp": "2026-06-24 16:12",
+      "status": "Open",
+      "ap_response": "",
+      "ap_response_date": "",
+      "resolved_date": ""
+    }
+  ],
   "changes": []
 }
