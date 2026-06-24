@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CF Deal Monitor</title>
+<title>CEO Deal Monitor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -311,7 +311,7 @@ a{color:var(--gold);text-decoration:none}
 
 <div id="topbar">
   <div id="topbar-left">
-    <div id="topbar-logo">CF <span>Deal Monitor</span></div>
+    <div id="topbar-logo">CEO <span>Deal Monitor</span></div>
     <div id="dept-label" class="topbar-sub">CEO's Office</div>
   </div>
   <div id="topbar-right">
@@ -510,7 +510,7 @@ function renderDashboard(){
   document.getElementById('theme-btn').textContent=document.documentElement.getAttribute('data-theme')==='dark'?'🌙':'☀️';
   document.getElementById('pub-date').textContent=m.published_at||'Unknown';
   document.getElementById('dept-label').textContent=m.department||"CEO's Office";
-  document.title=`CF Deal Monitor — ${m.company_name||''}`;
+  document.title=`CEO Deal Monitor — ${m.company_name||''}`;
   applyStaleness(m);
   document.getElementById('footer-company').textContent=m.company_name||'';
   document.getElementById('footer-dept').textContent=m.department||'';
