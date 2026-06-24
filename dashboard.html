@@ -432,7 +432,9 @@ a{color:var(--gold);text-decoration:none}
   <span id="footer-pub">—</span> &nbsp;·&nbsp; Dashboard <span id="footer-version">v2.0</span> &nbsp;·&nbsp; Internal use only
 </div>
 <script>
-const EMAILJS_CONFIG={enabled:true,publicKey:"J8Vaca0xa7sNP6QHL",serviceId:"service_ywd7uoe",templateId:"template_yr62rr6",toEmail:"andrewpreemadass@dohcapital.my"};
+const EMAILJS_CONFIG={enabled:false,publicKey:"J8Vaca0xa7sNP6QHL",serviceId:"service_ywd7uoe",templateId:"template_yr62rr6",toEmail:"andrewpreemadass@dohcapital.my"};
+// Supabase = the cloud "mailbox" that stores reviewer comments. The publishable key below is safe to be public.
+const SUPABASE_CONFIG={enabled:true,url:"https://ukucuqtldarxdgxmvyqp.supabase.co",key:"sb_publishable_TgvY_ekzJefbfLz05lQ4RQ_MIK5XrR7"};
 let DATA=null,IS_REVIEWER=false,REVIEWER_NAME="CEO",FILTER='all',SEARCH='',SORT='default',SORT_DIR={};
 let pendingComments=[],GANTT_LEVEL='all',ganttExpanded={},lastPublishedIso=null,CURRENT_VIEW='dashboard';
 
@@ -768,11 +770,33 @@ function updatePendingCount(){const c=pendingComments.length,el=document.getElem
 function submitAllComments(){
   if(pendingComments.length===0){alert('No pending comments.');return;}
   const count=pendingComments.length;
-  if(EMAILJS_CONFIG.enabled&&window.emailjs){
+  // PRIMARY PATH: save comments straight into the Supabase cloud mailbox.
+  if(SUPABASE_CONFIG.enabled&&SUPABASE_CONFIG.url&&SUPABASE_CONFIG.key){
+    const rows=pendingComments.map(c=>({
+      comment_id:c.comment_id,comment_level:c.comment_level,
+      project_ref:c.project_ref||'',workstream_ref:c.workstream_ref||'',task_ref:c.task_ref||'',
+      commented_by:c.commented_by,comment_type:c.comment_type,comment_text:c.comment_text,
+      client_time:c.timestamp,status:c.status||'Open'}));
+    const btn=document.getElementById('submit-all-btn');if(btn){btn.disabled=true;btn.textContent='Sending…';}
+    fetch(SUPABASE_CONFIG.url.replace(/\/+$/,'')+'/rest/v1/ceo_comments',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_CONFIG.key,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(rows)
+    }).then(r=>{
+      if(r.ok){markSubmitted(count);}
+      else{r.text().then(t=>{console.error('Supabase save failed:',r.status,t);
+        alert('Could not save to the server just now — downloading a backup file instead. Please send it to AP so nothing is lost.');
+        downloadComments();markSubmitted(count);});}
+    }).catch(err=>{console.error('Supabase unreachable:',err);
+      alert('Could not reach the server (it may be waking up). Downloading a backup file instead — please send it to AP, then it will work next time.');
+      downloadComments();markSubmitted(count);});
+  // FALLBACK PATH (only if Supabase is turned off): email via EmailJS.
+  }else if(EMAILJS_CONFIG.enabled&&window.emailjs){
     const payload={to_email:EMAILJS_CONFIG.toEmail,reviewer:REVIEWER_NAME,count:count,submitted_at:new Date().toLocaleString(),comments_json:JSON.stringify(pendingComments,null,2),comments_readable:pendingComments.map((c,i)=>`${i+1}. [${c.comment_level}/${c.comment_type}] ${c.project_ref||'General'}${c.workstream_ref?' > '+c.workstream_ref:''}${c.task_ref?' > '+c.task_ref:''}\n   ${c.comment_text}`).join('\n\n')};
     emailjs.send(EMAILJS_CONFIG.serviceId,EMAILJS_CONFIG.templateId,payload)
       .then(()=>{markSubmitted(count);downloadComments();})
       .catch(err=>{alert('Email failed ('+err.text+'). Downloading file instead — please send it to AP.');downloadComments();markSubmitted(count);});
+  // LAST RESORT: just download the file.
   }else{downloadComments();markSubmitted(count);}
 }
 function downloadComments(){const blob=new Blob([JSON.stringify(pendingComments,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ceo_comments.json';a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}
